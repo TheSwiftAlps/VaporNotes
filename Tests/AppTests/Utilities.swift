@@ -9,6 +9,8 @@ extension Droplet {
     static func testable() throws -> Droplet {
         let config = try Config(arguments: ["vapor", "--env=test"])
         try config.setup()
+        config.addConfigurable(command: BuildAndRunCommand.init, name: "build-run")
+
         let drop = try Droplet(config)
         try drop.setup()
         return drop

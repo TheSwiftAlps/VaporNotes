@@ -9,8 +9,8 @@ import Sockets
 /// individual controller without initializing
 /// a Droplet.
 
-class PostControllerTests: TestCase {
-    let initialMessage = "I'm a post"
+class NoteControllerTests: TestCase {
+    let initialMessage = "I'm a note"
     let updatedMessage = "I have been updated \(Date())"
 
     /// For these tests, we won't be spinning up a live
@@ -19,10 +19,10 @@ class PostControllerTests: TestCase {
     /// this is usually an effective way to test your
     /// application in a convenient and safe manner
     /// See RouteTests for an example of a live server test
-    let controller = PostController()
+    let controller = NoteController()
 
-    func testPostRoutes() throws {
-        guard let postOne = try storeNewPost(), let idOne = postOne.id?.int else {
+    func testNoteRoutes() throws {
+        guard let noteOne = try storeNewNote(), let idOne = noteOne.id?.int else {
             XCTFail()
             return
         }
@@ -32,7 +32,7 @@ class PostControllerTests: TestCase {
         try patch(id: idOne)
         try put(id: idOne)
 
-        guard let postTwo = try storeNewPost(), let idTwo = postTwo.id?.int else {
+        guard let noteTwo = try storeNewNote(), let idTwo = noteTwo.id?.int else {
             XCTFail()
             return
         }
@@ -46,38 +46,38 @@ class PostControllerTests: TestCase {
         try fetchAll(expectCount: 0)
 
         for _ in 1...5 {
-            _ = try storeNewPost()
+            _ = try storeNewNote()
         }
         try fetchAll(expectCount: 5)
         try deleteAll()
         try fetchAll(expectCount: 0)
     }
 
-    func storeNewPost() throws -> Post? {
+    func storeNewNote() throws -> Note? {
         let req = Request.makeTest(method: .post)
-        req.json = try JSON(node: ["content": initialMessage])
+        req.json = try JSON(node: ["contents": initialMessage, "title": "Title"])
         let res = try controller.store(req).makeResponse()
 
         let json = res.json
         XCTAssertNotNil(json)
         let newId: Int? = try json?.get("id")
         XCTAssertNotNil(newId)
-        XCTAssertNotNil(json?["content"])
-        XCTAssertEqual(json?["content"], req.json?["content"])
-        return try Post.find(newId)
+        XCTAssertNotNil(json?["contents"])
+        XCTAssertEqual(json?["contents"], req.json?["contents"])
+        return try Note.find(newId)
     }
 
     func fetchOne(id: Int) throws {
         let req = Request.makeTest(method: .get)
-        let post = try Post.find(id)!
-        let res = try controller.show(req, post: post).makeResponse()
+        let note = try Note.find(id)!
+        let res = try controller.show(req, note: note).makeResponse()
 
         let json = res.json
         XCTAssertNotNil(json)
-        XCTAssertNotNil(json?["content"])
+        XCTAssertNotNil(json?["contents"])
         XCTAssertNotNil(json?["id"])
         XCTAssertEqual(json?["id"]?.int, id)
-        XCTAssertEqual(json?["content"]?.string, initialMessage)
+        XCTAssertEqual(json?["contents"]?.string, initialMessage)
     }
 
     func fetchAll(expectCount count: Int) throws {
@@ -91,37 +91,37 @@ class PostControllerTests: TestCase {
 
     func patch(id: Int) throws {
         let req = Request.makeTest(method: .patch)
-        req.json = try JSON(node: ["content": updatedMessage])
-        let post = try Post.find(id)!
-        let res = try controller.update(req, post: post).makeResponse()
+        req.json = try JSON(node: ["contents": updatedMessage])
+        let note = try Note.find(id)!
+        let res = try controller.update(req, note: note).makeResponse()
 
         let json = res.json
         XCTAssertNotNil(json)
-        XCTAssertNotNil(json?["content"])
+        XCTAssertNotNil(json?["contents"])
         XCTAssertNotNil(json?["id"])
         XCTAssertEqual(json?["id"]?.int, id)
-        XCTAssertEqual(json?["content"]?.string, updatedMessage)
+        XCTAssertEqual(json?["contents"]?.string, updatedMessage)
     }
 
     func put(id: Int) throws {
         let req = Request.makeTest(method: .put)
-        req.json = try JSON(node: ["content": updatedMessage])
-        let post = try Post.find(id)!
-        let res = try controller.replace(req, post: post).makeResponse()
+        req.json = try JSON(node: ["contents": updatedMessage, "title": "New title"])
+        let note = try Note.find(id)!
+        let res = try controller.replace(req, note: note).makeResponse()
 
         let json = res.json
         XCTAssertNotNil(json)
-        XCTAssertNotNil(json?["content"])
+        XCTAssertNotNil(json?["contents"])
         XCTAssertNotNil(json?["id"])
         XCTAssertEqual(json?["id"]?.int, id)
-        XCTAssertEqual(json?["content"]?.string, updatedMessage)
+        XCTAssertEqual(json?["contents"]?.string, updatedMessage)
     }
 
     func deleteOne(id: Int) throws {
         let req = Request.makeTest(method: .delete)
 
-        let post = try Post.find(id)!
-        _ = try controller.delete(req, post: post)
+        let note = try Note.find(id)!
+        _ = try controller.delete(req, note: note)
     }
 
     func deleteAll() throws {
@@ -132,11 +132,11 @@ class PostControllerTests: TestCase {
 
 // MARK: Manifest
 
-extension PostControllerTests {
+extension NoteControllerTests {
     /// This is a requirement for XCTest on Linux
     /// to function properly.
     /// See ./Tests/LinuxMain.swift for examples
     static let allTests = [
-        ("testPostRoutes", testPostRoutes),
+        ("testNoteRoutes", testNoteRoutes),
     ]
 }

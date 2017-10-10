@@ -2,7 +2,9 @@ import Vapor
 import FluentProvider
 import HTTP
 
-final class Note: Model {
+final class Note: Model, Timestampable, SoftDeletable {
+    static let idType: IdentifierType = .uuid
+
     let storage = Storage()
 
     // MARK: Properties and database keys

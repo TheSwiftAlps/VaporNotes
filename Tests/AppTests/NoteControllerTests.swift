@@ -22,7 +22,7 @@ class NoteControllerTests: TestCase {
     let controller = NoteController()
 
     func testNoteRoutes() throws {
-        guard let noteOne = try storeNewNote(), let idOne = noteOne.id?.int else {
+        guard let noteOne = try storeNewNote(), let idOne = noteOne.id else {
             XCTFail()
             return
         }
@@ -32,7 +32,7 @@ class NoteControllerTests: TestCase {
         try patch(id: idOne)
         try put(id: idOne)
 
-        guard let noteTwo = try storeNewNote(), let idTwo = noteTwo.id?.int else {
+        guard let noteTwo = try storeNewNote(), let idTwo = noteTwo.id else {
             XCTFail()
             return
         }
@@ -60,14 +60,14 @@ class NoteControllerTests: TestCase {
 
         let json = res.json
         XCTAssertNotNil(json)
-        let newId: Int? = try json?.get("id")
+        let newId: String? = try json?.get("id")
         XCTAssertNotNil(newId)
         XCTAssertNotNil(json?["contents"])
         XCTAssertEqual(json?["contents"], req.json?["contents"])
         return try Note.find(newId)
     }
 
-    func fetchOne(id: Int) throws {
+    func fetchOne(id: Identifier) throws {
         let req = Request.makeTest(method: .get)
         req.parameters["note_id"] = Parameters(id)
         let res = try controller.show(req).makeResponse()
@@ -76,7 +76,7 @@ class NoteControllerTests: TestCase {
         XCTAssertNotNil(json)
         XCTAssertNotNil(json?["contents"])
         XCTAssertNotNil(json?["id"])
-        XCTAssertEqual(json?["id"]?.int, id)
+        XCTAssertEqual(json?["id"]?.string, id.string)
         XCTAssertEqual(json?["contents"]?.string, initialMessage)
     }
 
@@ -89,7 +89,7 @@ class NoteControllerTests: TestCase {
         XCTAssertEqual(json?.array?.count, count)
     }
 
-    func patch(id: Int) throws {
+    func patch(id: Identifier) throws {
         let req = Request.makeTest(method: .patch)
         req.json = try JSON(node: ["contents": updatedMessage])
         req.parameters["note_id"] = Parameters(id)
@@ -99,11 +99,11 @@ class NoteControllerTests: TestCase {
         XCTAssertNotNil(json)
         XCTAssertNotNil(json?["contents"])
         XCTAssertNotNil(json?["id"])
-        XCTAssertEqual(json?["id"]?.int, id)
+        XCTAssertEqual(json?["id"]?.string, id.string)
         XCTAssertEqual(json?["contents"]?.string, updatedMessage)
     }
 
-    func put(id: Int) throws {
+    func put(id: Identifier) throws {
         let req = Request.makeTest(method: .put)
         req.json = try JSON(node: ["contents": updatedMessage, "title": "New title"])
         req.parameters["note_id"] = Parameters(id)
@@ -113,11 +113,11 @@ class NoteControllerTests: TestCase {
         XCTAssertNotNil(json)
         XCTAssertNotNil(json?["contents"])
         XCTAssertNotNil(json?["id"])
-        XCTAssertEqual(json?["id"]?.int, id)
+        XCTAssertEqual(json?["id"]?.string, id.string)
         XCTAssertEqual(json?["contents"]?.string, updatedMessage)
     }
 
-    func deleteOne(id: Int) throws {
+    func deleteOne(id: Identifier) throws {
         let req = Request.makeTest(method: .delete)
         req.parameters["note_id"] = Parameters(id)
         _ = try controller.delete(req)

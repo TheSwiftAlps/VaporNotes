@@ -8,6 +8,8 @@ extension Droplet {
         v1.get("notes", handler: controller.index)
         v1.get("notes", Note.parameter, handler: controller.show)
         v1.post("notes", handler: controller.store)
+        v1.put("notes", Note.parameter, handler: controller.replace)
+        v1.delete("notes", Note.parameter, handler: controller.delete)
 
         get("ping") { req in
             var json = JSON()

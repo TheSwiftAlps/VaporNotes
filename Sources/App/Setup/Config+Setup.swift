@@ -9,6 +9,16 @@ extension Config {
 
         try setupProviders()
         try setupPreparations()
+        try setupMiddleware()
+        try setupCommands()
+    }
+
+    private func setupCommands() throws {
+        try addConfigurable(command: BuildAndRunCommand.init, name: "build-run")
+    }
+
+    private func setupMiddleware() throws {
+        try addConfigurable(middleware: VersionMiddleware(), name: "version")
     }
 
     /// Configure providers

@@ -18,7 +18,6 @@ import App
 /// if no command is given, it will default to "serve"
 let config = try Config()
 try config.setup()
-try config.addConfigurable(command: BuildAndRunCommand.init, name: "build-run")
 
 let drop = try Droplet(config)
 try drop.setup()

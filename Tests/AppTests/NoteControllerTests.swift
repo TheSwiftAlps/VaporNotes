@@ -69,8 +69,8 @@ class NoteControllerTests: TestCase {
 
     func fetchOne(id: Int) throws {
         let req = Request.makeTest(method: .get)
-        let note = try Note.find(id)!
-        let res = try controller.show(req, note: note).makeResponse()
+        req.parameters["note_id"] = Parameters(id)
+        let res = try controller.show(req).makeResponse()
 
         let json = res.json
         XCTAssertNotNil(json)
@@ -92,8 +92,8 @@ class NoteControllerTests: TestCase {
     func patch(id: Int) throws {
         let req = Request.makeTest(method: .patch)
         req.json = try JSON(node: ["contents": updatedMessage])
-        let note = try Note.find(id)!
-        let res = try controller.update(req, note: note).makeResponse()
+        req.parameters["note_id"] = Parameters(id)
+        let res = try controller.update(req).makeResponse()
 
         let json = res.json
         XCTAssertNotNil(json)
@@ -106,8 +106,8 @@ class NoteControllerTests: TestCase {
     func put(id: Int) throws {
         let req = Request.makeTest(method: .put)
         req.json = try JSON(node: ["contents": updatedMessage, "title": "New title"])
-        let note = try Note.find(id)!
-        let res = try controller.replace(req, note: note).makeResponse()
+        req.parameters["note_id"] = Parameters(id)
+        let res = try controller.replace(req).makeResponse()
 
         let json = res.json
         XCTAssertNotNil(json)
@@ -119,9 +119,8 @@ class NoteControllerTests: TestCase {
 
     func deleteOne(id: Int) throws {
         let req = Request.makeTest(method: .delete)
-
-        let note = try Note.find(id)!
-        _ = try controller.delete(req, note: note)
+        req.parameters["note_id"] = Parameters(id)
+        _ = try controller.delete(req)
     }
 
     func deleteAll() throws {

@@ -1,7 +1,7 @@
 import Vapor
 import HTTP
 
-final class NoteController: ResourceRepresentable {
+final class NoteController {
     func index(_ req: Request) throws -> ResponseRepresentable {
         return try Note.all().makeJSON()
     }
@@ -16,13 +16,15 @@ final class NoteController: ResourceRepresentable {
 
     /// When the consumer calls 'GET' on a specific resource, ie:
     /// '/notes/13rd88' we should show that specific note
-    func show(_ req: Request, note: Note) throws -> ResponseRepresentable {
+    func show(_ req: Request) throws -> ResponseRepresentable {
+        let note = try req.parameters.next(Note.self)
         return note
     }
 
     /// When the consumer calls 'DELETE' on a specific resource, ie:
     /// 'notes/l2jd9' we should remove that resource from the database
-    func delete(_ req: Request, note: Note) throws -> ResponseRepresentable {
+    func delete(_ req: Request) throws -> ResponseRepresentable {
+        let note = try req.parameters.next(Note.self)
         try note.delete()
         return Response(status: .ok)
     }
@@ -36,8 +38,9 @@ final class NoteController: ResourceRepresentable {
 
     /// When the user calls 'PATCH' on a specific resource, we should
     /// update that resource to the new values.
-    func update(_ req: Request, note: Note) throws -> ResponseRepresentable {
+    func update(_ req: Request) throws -> ResponseRepresentable {
         // See `extension Note: Updateable`
+        let note = try req.parameters.next(Note.self)
         try note.update(for: req)
 
         // Save an return the updated note.
@@ -48,34 +51,19 @@ final class NoteController: ResourceRepresentable {
     /// When a user calls 'PUT' on a specific resource, we should replace any
     /// values that do not exist in the request with null.
     /// This is equivalent to creating a new Note with the same ID.
-    func replace(_ req: Request, note: Note) throws -> ResponseRepresentable {
+    func replace(_ req: Request) throws -> ResponseRepresentable {
         // First attempt to create a new Note from the supplied JSON.
         // If any required fields are missing, this request will be denied.
         let new = try req.note()
 
         // Update the note with all of the properties from
         // the new note
+        let note = try req.parameters.next(Note.self)
         note.contents = new.contents
         try note.save()
 
         // Return the updated note
         return note
-    }
-
-    /// When making a controller, it is pretty flexible in that it
-    /// only expects closures, this is useful for advanced scenarios, but
-    /// most of the time, it should look almost identical to this
-    /// implementation
-    func makeResource() -> Resource<Note> {
-        return Resource(
-            index: index,
-            store: store,
-            show: show,
-            update: update,
-            replace: replace,
-            destroy: delete,
-            clear: clear
-        )
     }
 }
 

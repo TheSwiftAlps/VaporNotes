@@ -2,7 +2,12 @@ import Vapor
 
 extension Droplet {
     func setupRoutes() throws {
-        try resource("notes", NoteController.self)
+        let controller = NoteController()
+        let api = grouped("api")
+        let v1 = api.grouped("v1")
+        v1.get("notes", handler: controller.index)
+        v1.get("notes", Note.parameter, handler: controller.show)
+        v1.post("notes", handler: controller.store)
 
         get("ping") { req in
             var json = JSON()

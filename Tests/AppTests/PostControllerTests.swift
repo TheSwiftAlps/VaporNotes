@@ -16,12 +16,12 @@ class PostControllerTests: TestCase {
     /// For these tests, we won't be spinning up a live
     /// server, and instead we'll be passing our constructed
     /// requests programmatically
-    /// this is usually an effective way to test your 
+    /// this is usually an effective way to test your
     /// application in a convenient and safe manner
     /// See RouteTests for an example of a live server test
     let controller = PostController()
-    
-    func testPostRoutes() throws {        
+
+    func testPostRoutes() throws {
         guard let postOne = try storeNewPost(), let idOne = postOne.id?.int else {
             XCTFail()
             return
@@ -57,7 +57,7 @@ class PostControllerTests: TestCase {
         let req = Request.makeTest(method: .post)
         req.json = try JSON(node: ["content": initialMessage])
         let res = try controller.store(req).makeResponse()
-        
+
         let json = res.json
         XCTAssertNotNil(json)
         let newId: Int? = try json?.get("id")
@@ -94,7 +94,7 @@ class PostControllerTests: TestCase {
         req.json = try JSON(node: ["content": updatedMessage])
         let post = try Post.find(id)!
         let res = try controller.update(req, post: post).makeResponse()
-        
+
         let json = res.json
         XCTAssertNotNil(json)
         XCTAssertNotNil(json?["content"])
@@ -119,7 +119,7 @@ class PostControllerTests: TestCase {
 
     func deleteOne(id: Int) throws {
         let req = Request.makeTest(method: .delete)
-        
+
         let post = try Post.find(id)!
         _ = try controller.delete(req, post: post)
     }

@@ -68,7 +68,7 @@ final class PostController: ResourceRepresentable {
 
     /// When making a controller, it is pretty flexible in that it
     /// only expects closures, this is useful for advanced scenarios, but
-    /// most of the time, it should look almost identical to this 
+    /// most of the time, it should look almost identical to this
     /// implementation
     func makeResource() -> Resource<Post> {
         return Resource(
@@ -85,7 +85,7 @@ final class PostController: ResourceRepresentable {
 
 extension Request {
     /// Create a post from the JSON body
-    /// return BadRequest error if invalid 
+    /// return BadRequest error if invalid
     /// or no JSON
     func post() throws -> Post {
         guard let json = json else { throw Abort.badRequest }
@@ -93,7 +93,7 @@ extension Request {
     }
 }
 
-/// Since PostController doesn't require anything to 
+/// Since PostController doesn't require anything to
 /// be initialized we can conform it to EmptyInitializable.
 ///
 /// This will allow it to be passed by type.

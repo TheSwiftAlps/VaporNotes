@@ -20,12 +20,12 @@
         }
       },
       {
-        "package": "CTLS",
-        "repositoryURL": "https://github.com/vapor/ctls.git",
+        "package": "cmark",
+        "repositoryURL": "https://github.com/brokenhandsio/cmark-gfm.git",
         "state": {
           "branch": null,
-          "revision": "fddec6a4643d6e85b6bb6dc54b1b5cdbabd395d2",
-          "version": "1.1.2"
+          "revision": "28d762c29119b5e1c3c0ba1e87198a6c0abcdd7a",
+          "version": "1.0.0"
         }
       },
       {
@@ -53,6 +53,15 @@
           "branch": null,
           "revision": "bf4470b9da79024aab79c85de80374f6c29e3864",
           "version": "2.1.1"
+        }
+      },
+      {
+        "package": "CTLS",
+        "repositoryURL": "https://github.com/vapor/ctls.git",
+        "state": {
+          "branch": null,
+          "revision": "fddec6a4643d6e85b6bb6dc54b1b5cdbabd395d2",
+          "version": "1.1.2"
         }
       },
       {
@@ -101,6 +110,33 @@
         }
       },
       {
+        "package": "Leaf",
+        "repositoryURL": "https://github.com/vapor/leaf.git",
+        "state": {
+          "branch": null,
+          "revision": "84d8af322158b71284c0ebd513f1c18474837d40",
+          "version": "2.0.2"
+        }
+      },
+      {
+        "package": "LeafProvider",
+        "repositoryURL": "https://github.com/vapor/leaf-provider.git",
+        "state": {
+          "branch": null,
+          "revision": "0cbeb0db6fc955c2cf12a0293c1e54f16cbb1ca3",
+          "version": "1.1.0"
+        }
+      },
+      {
+        "package": "MarkdownProvider",
+        "repositoryURL": "https://github.com/vapor-community/markdown-provider.git",
+        "state": {
+          "branch": null,
+          "revision": "bd3820af8bd6b0ffd2b279f105e5df0850f58edd",
+          "version": "1.1.0"
+        }
+      },
+      {
         "package": "Multipart",
         "repositoryURL": "https://github.com/vapor/multipart.git",
         "state": {
@@ -137,6 +173,15 @@
         }
       },
       {
+        "package": "Sockets",
+        "repositoryURL": "https://github.com/vapor/sockets.git",
+        "state": {
+          "branch": null,
+          "revision": "f6b06982e94db71227e99c56fec5899a8526e8ad",
+          "version": "2.1.0"
+        }
+      },
+      {
         "package": "SQLite",
         "repositoryURL": "https://github.com/vapor/sqlite.git",
         "state": {
@@ -146,12 +191,12 @@
         }
       },
       {
-        "package": "Sockets",
-        "repositoryURL": "https://github.com/vapor/sockets.git",
+        "package": "SwiftMarkdown",
+        "repositoryURL": "https://github.com/vapor-community/markdown.git",
         "state": {
           "branch": null,
-          "revision": "f6b06982e94db71227e99c56fec5899a8526e8ad",
-          "version": "2.1.0"
+          "revision": "aea4876786fa284f6d86af1ce3436a17e22035b5",
+          "version": "0.4.0"
         }
       },
       {

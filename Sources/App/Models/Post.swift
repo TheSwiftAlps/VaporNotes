@@ -4,12 +4,12 @@ import HTTP
 
 final class Post: Model {
     let storage = Storage()
-    
+
     // MARK: Properties and database keys
-    
+
     /// The content of the post
     var content: String
-    
+
     /// The column names for `id` and `content` in the database
     struct Keys {
         static let id = "id"
@@ -68,7 +68,7 @@ extension Post: JSONConvertible {
             content: try json.get(Post.Keys.content)
         )
     }
-    
+
     func makeJSON() throws -> JSON {
         var json = JSON()
         try json.set(Post.Keys.id, id)

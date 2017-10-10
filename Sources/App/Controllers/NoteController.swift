@@ -3,7 +3,12 @@ import HTTP
 
 final class NoteController {
     func index(_ req: Request) throws -> ResponseRepresentable {
-        return try Note.all().makeJSON()
+        let notes = try Note.all()
+        let notesJSON = try notes.makeJSON()
+        var json = JSON()
+        try json.set("response", notesJSON)
+
+        return try json.makeResponse()
     }
 
     /// When consumers call 'POST' on '/notes' with valid JSON

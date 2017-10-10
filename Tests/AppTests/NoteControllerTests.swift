@@ -75,8 +75,9 @@ class NoteControllerTests: TestCase {
         let res = try controller.index(req).makeResponse()
 
         let json = res.json
-        XCTAssertNotNil(json?.array)
-        XCTAssertEqual(json?.array?.count, count)
+        XCTAssertNotNil(json)
+        XCTAssertNotNil(json?["response"])
+        XCTAssertEqual(json?["response"]?.array?.count, count)
     }
 
     func patch(id: Identifier) throws {

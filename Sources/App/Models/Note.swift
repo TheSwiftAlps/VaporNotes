@@ -2,7 +2,7 @@ import Vapor
 import FluentProvider
 import HTTP
 
-final class Note: Model, Timestampable, SoftDeletable {
+final class Note: Model {
     static let idType: IdentifierType = .uuid
 
     let storage = Storage()
@@ -83,9 +83,19 @@ extension Note: JSONConvertible {
     }
 }
 
+/// Since Note doesn't require anything to
+/// be initialized we can conform it to EmptyInitializable.
+///
+/// This will allow it to be passed by type.
+extension Note: EmptyInitializable { }
+
 // MARK: HTTP
 
 extension Note: ResponseRepresentable { }
+
+extension Note: Timestampable { }
+
+extension Note: SoftDeletable { }
 
 // MARK: Update
 

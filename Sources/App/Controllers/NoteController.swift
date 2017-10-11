@@ -82,11 +82,5 @@ extension Request {
     }
 }
 
-/// Since Note doesn't require anything to
-/// be initialized we can conform it to EmptyInitializable.
-///
-/// This will allow it to be passed by type.
-extension Note: EmptyInitializable { }
-
 extension NoteController: EmptyInitializable { }
 

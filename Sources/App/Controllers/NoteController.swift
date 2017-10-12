@@ -3,7 +3,7 @@ import HTTP
 
 final class NoteController {
     func index(_ req: Request) throws -> ResponseRepresentable {
-        let notes = try Note.all()
+        let notes = try req.user().notes.all()
         let notesJSON = try notes.makeJSON()
         var json = JSON()
         try json.set("response", notesJSON)
@@ -78,7 +78,9 @@ extension Request {
     /// or no JSON
     func note() throws -> Note {
         guard let json = json else { throw Abort.badRequest }
-        return try Note(json: json)
+        let note = try Note(json: json)
+        note.userId = try user().assertExists()
+        return note
     }
 }
 

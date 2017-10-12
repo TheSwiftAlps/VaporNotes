@@ -15,6 +15,10 @@ final class User: Model {
     /// The user's _hashed_ password
     var password: String?
 
+    var notes: Children<User, Note> {
+        return children()
+    }
+
     /// Creates a new User
     init(name: String, email: String, password: String? = nil) {
         self.name = name

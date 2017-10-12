@@ -15,6 +15,13 @@ final class Note: Model {
     /// The contents of the note
     var contents: String
 
+    /// The identifier of the user to which the token belongs
+    var userId: Identifier? = nil
+
+    var user: Parent<Note, User> {
+        return parent(id: userId)
+    }
+
     /// The column names for `id` and `contents` in the database
     struct Keys {
         static let id = "id"
@@ -25,6 +32,7 @@ final class Note: Model {
     init() {
         self.title = ""
         self.contents = ""
+        self.userId = nil
     }
 
     init(title: String, contents: String) {
@@ -37,12 +45,14 @@ final class Note: Model {
     init(row: Row) throws {
         title = try row.get(Note.Keys.title)
         contents = try row.get(Note.Keys.contents)
+        userId = try row.get(User.foreignIdKey)
     }
 
     func makeRow() throws -> Row {
         var row = Row()
         try row.set(Note.Keys.contents, contents)
         try row.set(Note.Keys.title, title)
+        try row.set(User.foreignIdKey, userId)
         return row
     }
 }
@@ -55,6 +65,7 @@ extension Note: Preparation {
             builder.id()
             builder.string(Note.Keys.title)
             builder.string(Note.Keys.contents)
+            builder.foreignId(for: User.self)
         }
     }
 

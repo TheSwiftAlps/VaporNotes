@@ -26,7 +26,7 @@ extension Droplet {
         //
         // POST /users
         // <json containing new user information>
-        post("users") { req in
+        post("api", "v1", "users") { req in
             // require that the request body be json
             guard let json = req.json else {
                 throw Abort(.badRequest)
@@ -75,7 +75,7 @@ extension Droplet {
         //
         // POST /login
         // Authorization: Basic <base64 email:password>
-        password.post("login") { req in
+        password.post("api", "v1", "login") { req in
             let user = try req.user()
             let token = try Token.generate(for: user)
             try token.save()
@@ -99,7 +99,7 @@ extension Droplet {
         //
         // GET /me
         // Authorization: Bearer <token from /login>
-        token.get("me") { req in
+        token.get("api", "v1", "me") { req in
             let user = try req.user()
             return "Hello, \(user.name)"
         }
@@ -111,7 +111,9 @@ extension Droplet {
         v1.get("notes", Note.parameter, handler: controller.show)
         v1.post("notes", handler: controller.store)
         v1.put("notes", Note.parameter, handler: controller.replace)
+        v1.patch("notes", Note.parameter, handler: controller.update)
         v1.delete("notes", Note.parameter, handler: controller.delete)
+        v1.delete("notes", handler: controller.clear)
     }
 }
 

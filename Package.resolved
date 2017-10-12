@@ -83,6 +83,15 @@
         }
       },
       {
+        "package": "CZlib",
+        "repositoryURL": "https://github.com/IBM-Swift/CZlib.git",
+        "state": {
+          "branch": null,
+          "revision": "272d6519fb83bbf4d74a0cabb9cbddd9d0643bfb",
+          "version": "0.1.1"
+        }
+      },
+      {
         "package": "Debugging",
         "repositoryURL": "https://github.com/vapor/debugging.git",
         "state": {
@@ -233,6 +242,15 @@
           "branch": null,
           "revision": "59bde985edbdf6480c541485317c8d41cc5fefb7",
           "version": "2.2.2"
+        }
+      },
+      {
+        "package": "ZIPFoundation",
+        "repositoryURL": "https://github.com/weichsel/ZIPFoundation.git",
+        "state": {
+          "branch": null,
+          "revision": "f37a158856d652f9e58647e4d2ac2fde6867dc28",
+          "version": "0.9.2"
         }
       }
     ]

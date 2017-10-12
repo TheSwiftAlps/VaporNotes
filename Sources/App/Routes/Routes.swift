@@ -20,10 +20,10 @@ extension Droplet {
             let currentWorkingPath = fileManager.currentDirectoryPath
             var sourceURL = URL(fileURLWithPath: currentWorkingPath)
             sourceURL.appendPathComponent("Sources")
-            var destinationURL = URL(fileURLWithPath: currentWorkingPath)
-            destinationURL.appendPathComponent("Public")
-            destinationURL.appendPathComponent("archive.zip")
             do {
+                var destinationURL = try fileManager.createTemporaryDirectory()
+                destinationURL.appendPathComponent("archive.zip")
+
                 try fileManager.zipItem(at: sourceURL, to: destinationURL)
                 let response = try Response(filePath: destinationURL.path)
                 response.headers["Content-Type"] = "application/zip"

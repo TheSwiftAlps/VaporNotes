@@ -1,14 +1,14 @@
+import Foundation
 import Vapor
 import HTTP
 
 final class NoteController {
+    lazy var formatter = DateFormatter()
+
     func index(_ req: Request) throws -> ResponseRepresentable {
         let notes = try req.user().notes.all()
         let notesJSON = try notes.makeJSON()
-        var json = JSON()
-        try json.set("response", notesJSON)
-
-        return try json.makeResponse()
+        return try wrapJSONResponse(with: notesJSON)
     }
 
     /// When consumers call 'POST' on '/notes' with valid JSON
@@ -16,14 +16,14 @@ final class NoteController {
     func store(_ req: Request) throws -> ResponseRepresentable {
         let note = try req.note()
         try note.save()
-        return note
+        return try wrapJSONResponse(with: note)
     }
 
     /// When the consumer calls 'GET' on a specific resource, ie:
     /// '/notes/13rd88' we should show that specific note
     func show(_ req: Request) throws -> ResponseRepresentable {
         let note = try req.parameters.next(Note.self)
-        return note
+        return try wrapJSONResponse(with: note)
     }
 
     /// When the consumer calls 'DELETE' on a specific resource, ie:
@@ -50,7 +50,7 @@ final class NoteController {
 
         // Save an return the updated note.
         try note.save()
-        return note
+        return try wrapJSONResponse(with: note)
     }
 
     /// When a user calls 'PUT' on a specific resource, we should replace any
@@ -68,7 +68,22 @@ final class NoteController {
         try note.save()
 
         // Return the updated note
-        return note
+        return try wrapJSONResponse(with: note)
+    }
+}
+
+extension NoteController {
+    private func wrapJSONResponse(with obj: ResponseRepresentable) throws -> ResponseRepresentable {
+        var json = JSON()
+        try json.set("data", obj)
+        try json.set("version", "1.0")
+
+        let date = Date()
+        formatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ssZZZZZ"
+        let string = formatter.string(from: date)
+        try json.set("timestamp", string)
+
+        return try json.makeResponse()
     }
 }
 

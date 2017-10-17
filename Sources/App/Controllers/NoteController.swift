@@ -1,12 +1,32 @@
 import Foundation
 import Vapor
 import HTTP
+import ZIPFoundation
 
 final class NoteController {
     lazy var formatter = DateFormatter()
 
     func index(_ req: Request) throws -> ResponseRepresentable {
         let notes = try req.user().notes.all()
+
+        if req.headers["Accept"] == "application/zip" {
+            let fileManager = FileManager()
+            let currentWorkingPath = fileManager.currentDirectoryPath
+            var sourceURL = URL(fileURLWithPath: currentWorkingPath)
+            sourceURL.appendPathComponent("Sources")
+            do {
+                var destinationURL = try fileManager.createTemporaryDirectory()
+                destinationURL.appendPathComponent("archive.zip")
+
+                try fileManager.zipItem(at: sourceURL, to: destinationURL)
+                let response = try Response(filePath: destinationURL.path)
+                response.headers["Content-Type"] = "application/zip"
+                response.headers["Content-Disposition"] = "inline; filename=\"archive.zip\""
+                return response
+            } catch {
+                throw Abort.serverError
+            }
+        }
         let notesJSON = try notes.makeJSON()
         return try wrapJSONResponse(with: notesJSON)
     }

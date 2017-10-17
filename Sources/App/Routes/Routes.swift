@@ -2,7 +2,6 @@ import Vapor
 import HTTP
 import AuthProvider
 import Foundation
-import ZIPFoundation
 
 extension Droplet {
     func setupRoutes() throws {
@@ -15,26 +14,6 @@ extension Droplet {
     /// without any authentication. This includes
     /// creating a new User.
     private func setupUnauthenticatedRoutes() throws {
-        get("zip") { req in
-            let fileManager = FileManager()
-            let currentWorkingPath = fileManager.currentDirectoryPath
-            var sourceURL = URL(fileURLWithPath: currentWorkingPath)
-            sourceURL.appendPathComponent("Sources")
-            do {
-                var destinationURL = try fileManager.createTemporaryDirectory()
-                destinationURL.appendPathComponent("archive.zip")
-
-                try fileManager.zipItem(at: sourceURL, to: destinationURL)
-                let response = try Response(filePath: destinationURL.path)
-                response.headers["Content-Type"] = "application/zip"
-                response.headers["Content-Disposition"] = "inline; filename=\"archive.zip\""
-                return response
-            } catch {
-                let response = Response(status: .ok, body: "Creation of ZIP archive failed with error:\(error)")
-                return response
-            }
-        }
-
         get("ping") { req in
             var json = JSON()
             try json.set("ping", "pong")

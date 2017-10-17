@@ -27,7 +27,7 @@ extension Droplet {
 
         get(String.parameter) { req in
             let slug = try req.parameters.next(String.self)
-            let note = try Note.makeQuery().filter("slug", slug).first()
+            let note = try Note.makeQuery().filter("slug", slug).filter("published", true).first()
             guard note != nil else {
                 throw Abort(.notFound, reason: "Note not found")
             }

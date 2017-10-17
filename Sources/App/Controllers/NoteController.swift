@@ -110,12 +110,14 @@ final class NoteController {
     func publish(_ req: Request) throws -> ResponseRepresentable {
         let note = try req.parameters.next(Note.self)
         note.published = true
+        try note.save()
         return Response(status: .ok)
     }
 
     func unpublish(_ req: Request) throws -> ResponseRepresentable {
         let note = try req.parameters.next(Note.self)
         note.published = false
+        try note.save()
         return Response(status: .ok)
     }
 }

@@ -20,10 +20,10 @@ final class NoteController {
         if accept != "application/zip" { throw Abort.badRequest }
         let fileManager = FileManager()
         do {
-            var destinationURL = try fileManager.createTemporaryDirectory()
-            var sourceURL = destinationURL.appendingPathComponent("backup")
+            var temp = try fileManager.createTemporaryDirectory()
+            var sourceURL = temp.appendingPathComponent("backup")
             try fileManager.createDirectory(at: sourceURL, withIntermediateDirectories: false, attributes: nil)
-            destinationURL.appendPathComponent("archive.zip")
+            let destinationURL = temp.appendingPathComponent("archive.zip")
 
             // Iterate all notes and save them in the "backup" folder
             let notes = try req.user().notes.all()

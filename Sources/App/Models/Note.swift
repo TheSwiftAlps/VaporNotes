@@ -18,8 +18,17 @@ final class Note: Model {
     /// The identifier of the user to which the token belongs
     var userId: Identifier? = nil
 
+    /// The string used to show publicly the note
+    var slug: String
+
+    var published: Bool
+
     var user: Parent<Note, User> {
         return parent(id: userId)
+    }
+
+    var text: String {
+        return "# \(title)\n\n\(contents)"
     }
 
     /// The column names for `id` and `contents` in the database
@@ -27,17 +36,23 @@ final class Note: Model {
         static let id = "id"
         static let title = "title"
         static let contents = "contents"
+        static let slug = "slug"
+        static let published = "published"
     }
 
     init() {
         self.title = ""
         self.contents = ""
+        self.slug = String.randomString(5).lowercased()
+        self.published = false
         self.userId = nil
     }
 
     init(title: String, contents: String) {
         self.title = title
         self.contents = contents
+        self.slug = String.randomString(5).lowercased()
+        self.published = false
     }
 
     // MARK: Fluent Serialization
@@ -45,6 +60,8 @@ final class Note: Model {
     init(row: Row) throws {
         title = try row.get(Note.Keys.title)
         contents = try row.get(Note.Keys.contents)
+        slug = try row.get(Note.Keys.slug)
+        published = try row.get(Note.Keys.published)
         userId = try row.get(User.foreignIdKey)
     }
 
@@ -52,6 +69,8 @@ final class Note: Model {
         var row = Row()
         try row.set(Note.Keys.contents, contents)
         try row.set(Note.Keys.title, title)
+        try row.set(Note.Keys.slug, slug)
+        try row.set(Note.Keys.published, published)
         try row.set(User.foreignIdKey, userId)
         return row
     }
@@ -65,6 +84,8 @@ extension Note: Preparation {
             builder.id()
             builder.string(Note.Keys.title)
             builder.string(Note.Keys.contents)
+            builder.string(Note.Keys.slug)
+            builder.bool(Note.Keys.published)
             builder.foreignId(for: User.self)
         }
     }
@@ -90,6 +111,8 @@ extension Note: JSONConvertible {
         try json.set(Note.Keys.id, id)
         try json.set(Note.Keys.title, title)
         try json.set(Note.Keys.contents, contents)
+        try json.set(Note.Keys.slug, slug)
+        try json.set(Note.Keys.published, published)
         return json
     }
 }
@@ -118,6 +141,12 @@ extension Note: Updateable {
             },
             UpdateableKey(Note.Keys.contents, String.self) { note, contents in
                 note.contents = contents
+            },
+            UpdateableKey(Note.Keys.slug, String.self) { note, slug in
+                note.slug = slug
+            },
+            UpdateableKey(Note.Keys.published, Bool.self) { note, published in
+                note.published = published
             },
         ]
     }

@@ -20,8 +20,8 @@ final class NoteController {
         if accept != "application/zip" { throw Abort.badRequest }
         let fileManager = FileManager()
         do {
-            var temp = try fileManager.createTemporaryDirectory()
-            var sourceURL = temp.appendingPathComponent("backup")
+            let temp = try fileManager.createTemporaryDirectory()
+            let sourceURL = temp.appendingPathComponent("backup")
             try fileManager.createDirectory(at: sourceURL, withIntermediateDirectories: false, attributes: nil)
             let destinationURL = temp.appendingPathComponent("archive.zip")
 
@@ -31,8 +31,7 @@ final class NoteController {
                 if let id = note.id {
                     let filename = "\(id.wrapped).txt"
                     let fileURL = sourceURL.appendingPathComponent(filename)
-                    let text = "# \(note.title)\n\n\(note.contents)"
-                    try text.write(to: fileURL, atomically: false, encoding: .utf8)
+                    try note.text.write(to: fileURL, atomically: false, encoding: .utf8)
                 }
             }
 
@@ -106,6 +105,18 @@ final class NoteController {
 
         // Return the updated note
         return try wrapJSONResponse(with: note)
+    }
+
+    func publish(_ req: Request) throws -> ResponseRepresentable {
+        let note = try req.parameters.next(Note.self)
+        note.published = true
+        return Response(status: .ok)
+    }
+
+    func unpublish(_ req: Request) throws -> ResponseRepresentable {
+        let note = try req.parameters.next(Note.self)
+        note.published = false
+        return Response(status: .ok)
     }
 }
 

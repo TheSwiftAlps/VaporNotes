@@ -1,7 +1,8 @@
+import Foundation
 import Vapor
 import HTTP
 import AuthProvider
-import Foundation
+import SwiftMarkdown
 
 extension Droplet {
     func setupRoutes() throws {
@@ -22,6 +23,18 @@ extension Droplet {
 
         get("info") { req in
             return req.description
+        }
+
+        get(String.parameter) { req in
+            let slug = try req.parameters.next(String.self)
+            let note = try Note.makeQuery().filter("slug", slug).first()
+            guard note != nil else {
+                throw Abort(.notFound, reason: "Note not found")
+            }
+            let html = try markdownToHTML(note!.text, options: [.safe])
+            let response = Response(status: .ok, body: html)
+            response.headers["Content-Type"] = "text/html"
+            return response
         }
 
         // create a new user
@@ -114,6 +127,8 @@ extension Droplet {
         v1.get("notes", Note.parameter, handler: controller.show)
         v1.post("notes", handler: controller.store)
         v1.put("notes", Note.parameter, handler: controller.replace)
+        v1.put("notes", Note.parameter, "publish", handler: controller.publish)
+        v1.put("notes", Note.parameter, "unpublish", handler: controller.unpublish)
         v1.patch("notes", Note.parameter, handler: controller.update)
         v1.delete("notes", Note.parameter, handler: controller.delete)
         v1.delete("notes", handler: controller.clear)

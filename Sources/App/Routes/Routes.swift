@@ -110,6 +110,7 @@ extension Droplet {
         let api = token.grouped("api")
         let v1 = api.grouped("v1")
         v1.get("notes", handler: controller.index)
+        v1.get("notes", "backup", handler: controller.zip)
         v1.get("notes", Note.parameter, handler: controller.show)
         v1.post("notes", handler: controller.store)
         v1.put("notes", Note.parameter, handler: controller.replace)

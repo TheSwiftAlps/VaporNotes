@@ -7,28 +7,45 @@ final class NoteController {
     lazy var formatter = DateFormatter()
 
     func index(_ req: Request) throws -> ResponseRepresentable {
-        let notes = try req.user().notes.all()
-
         if req.headers["Accept"] == "application/zip" {
-            let fileManager = FileManager()
-            let currentWorkingPath = fileManager.currentDirectoryPath
-            var sourceURL = URL(fileURLWithPath: currentWorkingPath)
-            sourceURL.appendPathComponent("Sources")
-            do {
-                var destinationURL = try fileManager.createTemporaryDirectory()
-                destinationURL.appendPathComponent("archive.zip")
-
-                try fileManager.zipItem(at: sourceURL, to: destinationURL)
-                let response = try Response(filePath: destinationURL.path)
-                response.headers["Content-Type"] = "application/zip"
-                response.headers["Content-Disposition"] = "inline; filename=\"archive.zip\""
-                return response
-            } catch {
-                throw Abort.serverError
-            }
+            return try zip(req)
         }
+        let notes = try req.user().notes.all()
         let notesJSON = try notes.makeJSON()
         return try wrapJSONResponse(with: notesJSON)
+    }
+
+    func zip(_ req: Request) throws -> ResponseRepresentable {
+        guard let accept = req.headers["Accept"] else { throw Abort.badRequest }
+        if accept != "application/zip" { throw Abort.badRequest }
+        let fileManager = FileManager()
+        do {
+            var destinationURL = try fileManager.createTemporaryDirectory()
+            var sourceURL = destinationURL.appendingPathComponent("backup")
+            try fileManager.createDirectory(at: sourceURL, withIntermediateDirectories: false, attributes: nil)
+            destinationURL.appendPathComponent("archive.zip")
+
+            // Iterate all notes and save them in the "backup" folder
+            let notes = try req.user().notes.all()
+            try notes.forEach { note in
+                if let id = note.id {
+                    let filename = "\(id.wrapped).txt"
+                    let fileURL = sourceURL.appendingPathComponent(filename)
+                    let text = "# \(note.title)\n\n\(note.contents)"
+                    try text.write(to: fileURL, atomically: false, encoding: .utf8)
+                }
+            }
+
+            // Create zip file and send it in the response
+            try fileManager.zipItem(at: sourceURL, to: destinationURL)
+            let response = try Response(filePath: destinationURL.path)
+            response.headers["Content-Type"] = "application/zip"
+            response.headers["Content-Disposition"] = "inline; filename=\"archive.zip\""
+            return response
+        } catch {
+            print("Error: \(error)")
+            throw Abort.serverError
+        }
     }
 
     /// When consumers call 'POST' on '/notes' with valid JSON

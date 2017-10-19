@@ -27,7 +27,7 @@ final class Note: Model {
         return parent(id: userId)
     }
 
-    var text: String {
+    var fullText: String {
         return "# \(title)\n\n\(contents)"
     }
 

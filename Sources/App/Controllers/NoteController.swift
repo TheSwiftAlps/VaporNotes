@@ -2,6 +2,7 @@ import Foundation
 import Vapor
 import HTTP
 import ZIPFoundation
+import SwiftMarkdown
 
 final class NoteController {
     lazy var formatter = DateFormatter()
@@ -31,7 +32,7 @@ final class NoteController {
                 if let id = note.id {
                     let filename = "\(id.wrapped).txt"
                     let fileURL = sourceURL.appendingPathComponent(filename)
-                    try note.text.write(to: fileURL, atomically: false, encoding: .utf8)
+                    try note.fullText.write(to: fileURL, atomically: false, encoding: .utf8)
                 }
             }
 
@@ -60,6 +61,18 @@ final class NoteController {
     func show(_ req: Request) throws -> ResponseRepresentable {
         let note = try req.parameters.next(Note.self)
         return try wrapJSONResponse(with: note)
+    }
+
+    func published(_ req: Request) throws -> ResponseRepresentable {
+        let slug = try req.parameters.next(String.self)
+        let note = try Note.makeQuery().filter("slug", slug).filter("published", true).first()
+        guard note != nil else {
+            throw Abort(.notFound, reason: "Note not found")
+        }
+        let html = try markdownToHTML(note!.fullText, options: [.safe])
+        let response = Response(status: .ok, body: html)
+        response.headers["Content-Type"] = "text/html"
+        return response
     }
 
     /// When the consumer calls 'DELETE' on a specific resource, ie:

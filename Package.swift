@@ -16,14 +16,17 @@ let package = Package(
         .package(url: "https://github.com/vapor/auth-provider.git",
             .upToNextMajor(from: "1.2.0")),
         .package(url:
+            "https://github.com/vapor/leaf-provider.git",
+            .upToNextMajor(from: "1.1.0")),
+        .package(url:
             "https://github.com/vapor-community/markdown-provider.git",
             .upToNextMajor(from: "1.1.0")),
         .package(url: "https://github.com/weichsel/ZIPFoundation.git",
             .upToNextMajor(from: "0.9.2")),
     ],
     targets: [
-        .target(name: "App", dependencies: ["Vapor", "FluentProvider",
-            "MarkdownProvider", "AuthProvider", "ZIPFoundation"],
+        .target(name: "App", dependencies: ["Vapor", "LeafProvider",
+            "FluentProvider", "MarkdownProvider", "AuthProvider", "ZIPFoundation"],
                 exclude: [
                     "Config",
                     "Public",

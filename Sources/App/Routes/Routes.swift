@@ -24,8 +24,19 @@ extension Droplet {
             return req.description
         }
 
-        let controller = NoteController()
-        get(String.parameter, handler: controller.published)
+        get(String.parameter) { req in
+            let slug = try req.parameters.next(String.self)
+            let note = try Note.makeQuery().filter("slug", slug)
+                                           .filter("published", true).first()
+            guard let n = note else {
+                throw Abort(.notFound, reason: "Note not found")
+            }
+            let data = [
+                "title": n.title,
+                "contents": n.contents
+            ]
+            return try self.view.make("template", data)
+        }
 
         // create a new user
         //

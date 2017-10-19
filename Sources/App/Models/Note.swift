@@ -124,6 +124,8 @@ extension Note: JSONConvertible {
         try json.set(Note.Keys.contents, contents)
         try json.set(Note.Keys.slug, slug)
         try json.set(Note.Keys.published, published)
+        try json.set(Note.updatedAtKey, updatedAt)
+        try json.set(Note.createdAtKey, createdAt)
         return json
     }
 }

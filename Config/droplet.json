@@ -3,6 +3,8 @@
     "//": "engine: Vapor's blazing fast Engine HTTP server.",
     "server": "engine",
 
+    "view": "leaf",
+
     "//": "The type of client to use for requesting data from other services.",
     "//": "engine: Vapor's blazing fast Engine HTTP client.",
     "//": "foundation: A wrapper around Foundation's URLSession.",

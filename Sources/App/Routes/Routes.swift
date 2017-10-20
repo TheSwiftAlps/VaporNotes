@@ -14,6 +14,10 @@ extension Droplet {
     /// without any authentication. This includes
     /// creating a new User.
     private func setupUnauthenticatedRoutes() throws {
+        get("/") { request in
+            return try Response(filePath: self.config.publicDir + "index.html")
+        }
+
         get("ping") { req in
             var json = JSON()
             try json.set("ping", "pong")

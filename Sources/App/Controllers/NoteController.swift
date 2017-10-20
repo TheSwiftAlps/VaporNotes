@@ -100,6 +100,7 @@ final class NoteController {
         // Update the note with all of the properties from
         // the new note
         let note = try req.parameters.next(Note.self)
+        note.title = new.title
         note.contents = new.contents
         try note.save()
 

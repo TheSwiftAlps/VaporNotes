@@ -1,3 +1,4 @@
+import Foundation
 import Vapor
 import FluentProvider
 import HTTP
@@ -28,7 +29,20 @@ final class Note: Model {
     }
 
     var fullText: String {
-        return "# \(title)\n\n\(contents)"
+        let formatter = DateFormatter()
+        formatter.dateStyle = .full
+        formatter.timeStyle = .full
+        let created = formatter.string(from: createdAt!)
+        let updated = formatter.string(from: updatedAt!)
+        let text = """
+        # \(title)
+
+        - Created \(created)
+        - Last modified \(updated)
+
+        \(contents)
+        """
+        return text
     }
 
     /// The column names for `id` and `contents` in the database

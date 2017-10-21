@@ -40,12 +40,26 @@ var NotesList = (function () {
         this.delegate = null;
         this._notesDiv = $('#notesDiv');
     }
+    NotesList.prototype.show = function () {
+        this._notesDiv.show();
+    };
+    NotesList.prototype.hide = function () {
+        this._notesDiv.hide();
+    };
     NotesList.prototype.empty = function () {
         this._notesDiv.empty();
     };
+    NotesList.prototype.writeEmptyMessage = function () {
+        var p = $("<p>No notes. Click \"create note\" to write one.</p>");
+        this._notesDiv.append(p);
+    };
     NotesList.prototype.displayNotes = function (notes) {
         var _this = this;
-        this.empty();
+        this._notesDiv.empty();
+        if (notes.length == 0) {
+            this.writeEmptyMessage();
+            return;
+        }
         var _loop_1 = function (note) {
             var p = $("<p>");
             var editButton = $('<input type="button" value="edit">');
@@ -54,7 +68,10 @@ var NotesList = (function () {
             });
             var deleteButton = $('<input type="button" value="delete">');
             deleteButton.bind('click', function () {
-                _this.delegate.onDeleteNote(note);
+                var ok = confirm("Are you sure?");
+                if (ok) {
+                    _this.delegate.onDeleteNote(note);
+                }
             });
             p.append(editButton);
             p.append("&nbsp;");
@@ -236,13 +253,14 @@ var Application = (function () {
             _this._network.tokenAuth(securityToken);
             _this._toolbar.enable();
             _this._loginForm.disable();
+            _this._notesList.show();
             _this.getNotes();
         });
     };
     Application.prototype.onLogout = function () {
-        this._editor.disable();
-        this._notesList.empty();
         this._network.noAuth();
+        this._editor.disable();
+        this._notesList.hide();
         this._toolbar.disable();
         this._loginForm.enable();
     };

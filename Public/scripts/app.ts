@@ -24,18 +24,18 @@ class Editor {
         });
     }
 
-    public enable(): void {
+    enable(): void {
         this._noteEditorDiv.show();
     }
 
-    public disable(): void {
+    disable(): void {
         this._noteEditorDiv.hide();
         this._titleField.val("");
         this._contentsField.val("");
         this._currentNote = null;
     }
 
-    public showNote(note): void {
+    showNote(note): void {
         this.enable();
         this._currentNote = note;
         this._titleField.val(note.title);
@@ -55,12 +55,29 @@ class NotesList {
         this._notesDiv = $('#notesDiv');
     }
 
-    public empty(): void {
+    show(): void {
+        this._notesDiv.show();
+    }
+
+    hide(): void {
+        this._notesDiv.hide();
+    }
+
+    empty(): void {
         this._notesDiv.empty();
     }
 
-    public displayNotes(notes): void {
-        this.empty();
+    writeEmptyMessage(): void {
+        let p = $("<p>No notes. Click \"create note\" to write one.</p>");
+        this._notesDiv.append(p);
+    }
+
+    displayNotes(notes): void {
+        this._notesDiv.empty();
+        if (notes.length == 0) {
+            this.writeEmptyMessage();
+            return;
+        }
         for (let note of notes) {
             let p = $("<p>");
             let editButton = $('<input type="button" value="edit">');
@@ -69,7 +86,10 @@ class NotesList {
             });
             let deleteButton = $('<input type="button" value="delete">');
             deleteButton.bind('click', () => {
-                this.delegate.onDeleteNote(note);
+                let ok = confirm("Are you sure?");
+                if (ok) {
+                    this.delegate.onDeleteNote(note);
+                }
             });
             p.append(editButton);
             p.append("&nbsp;");
@@ -124,7 +144,7 @@ class LoginForm {
         });
     }
 
-    public enable(): void {
+    enable(): void {
         this._usernameField.removeAttr("disabled");
         this._passwordField.removeAttr("disabled");
         this._loginButton.val("login");
@@ -136,7 +156,7 @@ class LoginForm {
         });
     }
 
-    public disable(): void {
+    disable(): void {
         this._usernameField.attr("disabled", "disabled");
         this._passwordField.attr("disabled", "disabled");
         this._loginButton.val("logout");
@@ -277,14 +297,15 @@ class Application implements EditorDelegate, NotesListDelegate, LoginFormDelegat
             this._network.tokenAuth(securityToken);
             this._toolbar.enable();
             this._loginForm.disable();
+            this._notesList.show();
             this.getNotes();
         });
     }
 
     onLogout(): void {
-        this._editor.disable();
-        this._notesList.empty();
         this._network.noAuth();
+        this._editor.disable();
+        this._notesList.hide();
         this._toolbar.disable();
         this._loginForm.enable();
     }
@@ -298,7 +319,7 @@ class Application implements EditorDelegate, NotesListDelegate, LoginFormDelegat
         });
     }
 
-    public getNotes(): void {
+    getNotes(): void {
         let url = "/api/v1/notes";
         this._network.sendRequest("GET", url, null, (data) => {
             let notes = data["data"];

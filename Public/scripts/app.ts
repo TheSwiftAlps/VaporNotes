@@ -19,7 +19,7 @@ class Editor {
                 "id": this.currentNote.id
             };
             if (this.delegate) {
-                this.delegate.onSaveButtonClick(this, data);
+                this.delegate.onSaveButtonClick(data);
             }
         });
     }
@@ -50,17 +50,75 @@ class Editor {
 }
 
 interface EditorDelegate {
-    onSaveButtonClick(editor: Editor, note);
+    onSaveButtonClick(note);
 }
 
-class Application implements EditorDelegate {
+class NotesList {
+    private notesDiv;
+    public delegate: NotesListDelegate = null;
+
+    constructor() {
+        this.notesDiv = $('#notesDiv');
+    }
+
+    public empty(): void {
+        this.notesDiv.empty();
+    }
+
+    public displayNotes(notes): void {
+        this.empty();
+        for (let note of notes) {
+            let p = $("<p>");
+            let editButton = $('<input type="button" value="edit">');
+            editButton.bind('click', () => {
+                this.delegate.onEditNote(note);
+            });
+            let deleteButton = $('<input type="button" value="delete">');
+            deleteButton.bind('click', () => {
+                this.delegate.onDeleteNote(note);
+            });
+            p.append(editButton);
+            p.append("&nbsp;");
+            if (note.published) {
+                let a = $('<a target="_blank" href="/' + note.slug + '">' + note.title + '</a>');
+                let unpublishButton = $('<input type="button" value="unpublish">');
+                unpublishButton.bind('click', () => {
+                    this.delegate.onUnpublishNote(note);
+                });
+                p.append(a);
+                p.append("&nbsp;");
+                p.append(unpublishButton);
+            }
+            else {
+                p.append(note.title);
+                let publishButton = $('<input type="button" value="publish">');
+                publishButton.bind('click', () => {
+                    this.delegate.onPublishNote(note);
+                });
+                p.append("&nbsp;");
+                p.append(publishButton);
+            }
+            p.append("&nbsp;");
+            p.append(deleteButton);
+            this.notesDiv.append(p);
+        }
+    }
+}
+
+interface NotesListDelegate {
+    onEditNote(note): void;
+    onDeleteNote(note): void;
+    onPublishNote(note): void;
+    onUnpublishNote(note): void;
+}
+
+class Application implements EditorDelegate, NotesListDelegate {
     private usernameField;
     private passwordField;
     private loginButton;
     private createNoteButton;
-    private notesDiv;
     private securityToken = null;
-    private notes = null;
+    private notesList = new NotesList();
     private editor = new Editor();
     private noteTemplate = {
         "title": "New note",
@@ -72,9 +130,9 @@ class Application implements EditorDelegate {
         this.passwordField = $('#passwordField');
         this.loginButton = $('#loginButton');
         this.createNoteButton = $('#createNoteButton');
-        this.notesDiv = $('#notesDiv');
 
         this.editor.delegate = this;
+        this.notesList.delegate = this;
 
         this.loginButton.bind('click', () => {
             this.login();
@@ -114,7 +172,7 @@ class Application implements EditorDelegate {
 
     public logout(): void {
         this.editor.disable();
-        this.notesDiv.empty();
+        this.notesList.empty();
         this.securityToken = null;
         this.usernameField.removeAttr("disabled");
         this.passwordField.removeAttr("disabled");
@@ -157,8 +215,8 @@ class Application implements EditorDelegate {
                     xhr.setRequestHeader ("Authorization", "Bearer " + this.securityToken);
                 },
                 success: (data) => {
-                    this.notes = data["data"];
-                    this.displayNotes();
+                    let notes = data["data"];
+                    this.notesList.displayNotes(notes);
                 },
             });
         }
@@ -167,13 +225,13 @@ class Application implements EditorDelegate {
         }
     }
 
-    public deleteNote(id): void {
+    public onDeleteNote(note): void {
         if (this.securityToken !== null) {
             this.editor.disable();
             $.ajax({
                 type: "DELETE",
                 contentType: "application/json; charset=utf-8",
-                url: "/api/v1/notes/" + id,
+                url: "/api/v1/notes/" + note.id,
                 beforeSend: (xhr) => {
                     xhr.setRequestHeader ("Authorization", "Bearer " + this.securityToken);
                 },
@@ -187,7 +245,7 @@ class Application implements EditorDelegate {
         }
     }
 
-    public onSaveButtonClick(editor, note): void {
+    public onSaveButtonClick(note): void {
         if (this.securityToken !== null && note !== null) {
             $.ajax({
                 type: "PUT",
@@ -204,12 +262,16 @@ class Application implements EditorDelegate {
         }
     }
 
-    public publishNote(id): void {
+    public onEditNote(note): void {
+        this.editor.showNote(note);
+    }
+
+    public onPublishNote(note): void {
         if (this.securityToken !== null) {
             $.ajax({
                 type: "PUT",
                 contentType: "application/json; charset=utf-8",
-                url: "/api/v1/notes/" + id + "/publish",
+                url: "/api/v1/notes/" + note.id + "/publish",
                 beforeSend: (xhr) => {
                     xhr.setRequestHeader ("Authorization", "Bearer " + this.securityToken);
                 },
@@ -220,12 +282,12 @@ class Application implements EditorDelegate {
         }
     }
 
-    public unpublishNote(id): void {
+    public onUnpublishNote(note): void {
         if (this.securityToken !== null) {
             $.ajax({
                 type: "PUT",
                 contentType: "application/json; charset=utf-8",
-                url: "/api/v1/notes/" + id + "/unpublish",
+                url: "/api/v1/notes/" + note.id + "/unpublish",
                 beforeSend: (xhr) => {
                     xhr.setRequestHeader ("Authorization", "Bearer " + this.securityToken);
                 },
@@ -233,45 +295,6 @@ class Application implements EditorDelegate {
                     this.getNotes();
                 },
             });
-        }
-    }
-
-    public displayNotes(): void {
-        this.notesDiv.empty();
-        for (let note of this.notes) {
-            let p = $("<p>");
-            let editButton = $('<input type="button" value="edit">');
-            editButton.bind('click', () => {
-                this.editor.showNote(note);
-            });
-            let deleteButton = $('<input type="button" value="delete">');
-            deleteButton.bind('click', () => {
-                this.deleteNote(note.id);
-            });
-            p.append(editButton);
-            p.append("&nbsp;");
-            if (note.published) {
-                let a = $('<a target="_blank" href="/' + note.slug + '">' + note.title + '</a>');
-                let unpublishButton = $('<input type="button" value="unpublish">');
-                unpublishButton.bind('click', () => {
-                    this.unpublishNote(note.id);
-                });
-                p.append(a);
-                p.append("&nbsp;");
-                p.append(unpublishButton);
-            }
-            else {
-                p.append(note.title);
-                let publishButton = $('<input type="button" value="publish">');
-                publishButton.bind('click', () => {
-                    this.publishNote(note.id);
-                });
-                p.append("&nbsp;");
-                p.append(publishButton);
-            }
-            p.append("&nbsp;");
-            p.append(deleteButton);
-            this.notesDiv.append(p);
         }
     }
 }

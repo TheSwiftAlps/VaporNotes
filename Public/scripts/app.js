@@ -2,16 +2,16 @@ var Editor = (function () {
     function Editor() {
         var _this = this;
         this.delegate = null;
-        this.currentNote = null;
-        this.noteEditorDiv = $('#noteEditorDiv');
-        this.titleField = $('#titleField');
-        this.contentsField = $('#contentsField');
-        this.saveButton = $('#saveButton');
-        this.saveButton.bind('click', function () {
+        this._currentNote = null;
+        this._noteEditorDiv = $('#noteEditorDiv');
+        this._titleField = $('#titleField');
+        this._contentsField = $('#contentsField');
+        this._saveButton = $('#saveButton');
+        this._saveButton.bind('click', function () {
             var data = {
-                "title": _this.titleField.val(),
-                "contents": _this.contentsField.val(),
-                "id": _this.currentNote.id
+                "title": _this._titleField.val(),
+                "contents": _this._contentsField.val(),
+                "id": _this._currentNote.id
             };
             if (_this.delegate) {
                 _this.delegate.onSaveButtonClick(data);
@@ -19,29 +19,29 @@ var Editor = (function () {
         });
     }
     Editor.prototype.enable = function () {
-        this.noteEditorDiv.show();
+        this._noteEditorDiv.show();
     };
     Editor.prototype.disable = function () {
-        this.noteEditorDiv.hide();
-        this.titleField.val("");
-        this.contentsField.val("");
-        this.currentNote = null;
+        this._noteEditorDiv.hide();
+        this._titleField.val("");
+        this._contentsField.val("");
+        this._currentNote = null;
     };
     Editor.prototype.showNote = function (note) {
         this.enable();
-        this.currentNote = note;
-        this.titleField.val(note.title);
-        this.contentsField.val(note.contents);
+        this._currentNote = note;
+        this._titleField.val(note.title);
+        this._contentsField.val(note.contents);
     };
     return Editor;
 }());
 var NotesList = (function () {
     function NotesList() {
         this.delegate = null;
-        this.notesDiv = $('#notesDiv');
+        this._notesDiv = $('#notesDiv');
     }
     NotesList.prototype.empty = function () {
-        this.notesDiv.empty();
+        this._notesDiv.empty();
     };
     NotesList.prototype.displayNotes = function (notes) {
         var _this = this;
@@ -79,7 +79,7 @@ var NotesList = (function () {
             }
             p.append("&nbsp;");
             p.append(deleteButton);
-            this_1.notesDiv.append(p);
+            this_1._notesDiv.append(p);
         };
         var this_1 = this;
         for (var _i = 0, notes_1 = notes; _i < notes_1.length; _i++) {
@@ -93,34 +93,34 @@ var LoginForm = (function () {
     function LoginForm() {
         var _this = this;
         this.delegate = null;
-        this.usernameField = $('#usernameField');
-        this.passwordField = $('#passwordField');
-        this.loginButton = $('#loginButton');
-        this.loginButton.bind('click', function () {
-            var user = _this.usernameField.val();
-            var pass = _this.passwordField.val();
+        this._usernameField = $('#usernameField');
+        this._passwordField = $('#passwordField');
+        this._loginButton = $('#loginButton');
+        this._loginButton.bind('click', function () {
+            var user = _this._usernameField.val();
+            var pass = _this._passwordField.val();
             _this.delegate.onLogin(user, pass);
         });
     }
     LoginForm.prototype.enable = function () {
         var _this = this;
-        this.usernameField.removeAttr("disabled");
-        this.passwordField.removeAttr("disabled");
-        this.loginButton.val("login");
-        this.loginButton.unbind('click');
-        this.loginButton.bind('click', function () {
-            var user = _this.usernameField.val();
-            var pass = _this.passwordField.val();
+        this._usernameField.removeAttr("disabled");
+        this._passwordField.removeAttr("disabled");
+        this._loginButton.val("login");
+        this._loginButton.unbind('click');
+        this._loginButton.bind('click', function () {
+            var user = _this._usernameField.val();
+            var pass = _this._passwordField.val();
             _this.delegate.onLogin(user, pass);
         });
     };
     LoginForm.prototype.disable = function () {
         var _this = this;
-        this.usernameField.attr("disabled", "disabled");
-        this.passwordField.attr("disabled", "disabled");
-        this.loginButton.val("logout");
-        this.loginButton.unbind('click');
-        this.loginButton.bind('click', function () {
+        this._usernameField.attr("disabled", "disabled");
+        this._passwordField.attr("disabled", "disabled");
+        this._loginButton.val("logout");
+        this._loginButton.unbind('click');
+        this._loginButton.bind('click', function () {
             _this.delegate.onLogout();
         });
     };
@@ -128,23 +128,30 @@ var LoginForm = (function () {
 }());
 var NetworkComponent = (function () {
     function NetworkComponent() {
-        this.beforeSendCallback = function (xhr) { };
-        this.securityToken = null;
+        this._beforeSendCallback = function (xhr) { };
+        this._securityToken = null;
     }
+    Object.defineProperty(NetworkComponent.prototype, "securityToken", {
+        get: function () {
+            return this._securityToken;
+        },
+        enumerable: true,
+        configurable: true
+    });
     NetworkComponent.prototype.noAuth = function () {
-        this.securityToken = null;
-        this.beforeSendCallback = function (xhr) { };
+        this._securityToken = null;
+        this._beforeSendCallback = function (xhr) { };
     };
     NetworkComponent.prototype.basicAuth = function (username, password) {
-        this.securityToken = null;
-        this.beforeSendCallback = function (xhr) {
+        this._securityToken = null;
+        this._beforeSendCallback = function (xhr) {
             var token = btoa(username + ":" + password);
             xhr.setRequestHeader("Authorization", "Basic " + token);
         };
     };
     NetworkComponent.prototype.tokenAuth = function (token) {
-        this.securityToken = token;
-        this.beforeSendCallback = function (xhr) {
+        this._securityToken = token;
+        this._beforeSendCallback = function (xhr) {
             xhr.setRequestHeader("Authorization", "Bearer " + token);
         };
     };
@@ -153,7 +160,7 @@ var NetworkComponent = (function () {
             type: method,
             url: url,
             contentType: "application/json; charset=utf-8",
-            beforeSend: this.beforeSendCallback,
+            beforeSend: this._beforeSendCallback,
             data: data,
             success: callback,
             error: function () {
@@ -166,104 +173,104 @@ var NetworkComponent = (function () {
 var Application = (function () {
     function Application() {
         var _this = this;
-        this.notesList = new NotesList();
-        this.editor = new Editor();
-        this.loginForm = new LoginForm();
-        this.network = new NetworkComponent();
-        this.noteTemplate = {
+        this._notesList = new NotesList();
+        this._editor = new Editor();
+        this._loginForm = new LoginForm();
+        this._network = new NetworkComponent();
+        this._noteTemplate = {
             "title": "New note",
             "contents": "New note contents"
         };
-        this.createNoteButton = $('#createNoteButton');
-        this.backupButton = $('#backupButton');
-        this.downloadFrame = document.getElementById('downloadFrame');
-        this.editor.delegate = this;
-        this.notesList.delegate = this;
-        this.loginForm.delegate = this;
-        this.createNoteButton.bind('click', function () {
+        this._createNoteButton = $('#createNoteButton');
+        this._backupButton = $('#backupButton');
+        this._downloadFrame = document.getElementById('downloadFrame');
+        this._editor.delegate = this;
+        this._notesList.delegate = this;
+        this._loginForm.delegate = this;
+        this._createNoteButton.bind('click', function () {
             _this.createNote();
         });
-        this.backupButton.bind('click', function () {
+        this._backupButton.bind('click', function () {
             _this.backup();
         });
     }
     Application.prototype.onLogin = function (user, pass) {
         var _this = this;
         var url = "/api/v1/login";
-        this.network.basicAuth(user, pass);
-        this.network.sendRequest("POST", url, null, function (data) {
+        this._network.basicAuth(user, pass);
+        this._network.sendRequest("POST", url, null, function (data) {
             var securityToken = data["token"];
-            _this.network.tokenAuth(securityToken);
-            _this.createNoteButton.removeAttr("disabled");
-            _this.backupButton.removeAttr("disabled");
-            _this.loginForm.disable();
+            _this._network.tokenAuth(securityToken);
+            _this._createNoteButton.removeAttr("disabled");
+            _this._backupButton.removeAttr("disabled");
+            _this._loginForm.disable();
             _this.getNotes();
         });
     };
     Application.prototype.onLogout = function () {
-        this.editor.disable();
-        this.notesList.empty();
-        this.network.noAuth();
-        this.createNoteButton.attr("disabled", "disabled");
-        this.backupButton.attr("disabled", "disabled");
-        this.loginForm.enable();
+        this._editor.disable();
+        this._notesList.empty();
+        this._network.noAuth();
+        this._createNoteButton.attr("disabled", "disabled");
+        this._backupButton.attr("disabled", "disabled");
+        this._loginForm.enable();
     };
     Application.prototype.createNote = function () {
         var _this = this;
-        this.editor.disable();
+        this._editor.disable();
         var url = "/api/v1/notes";
-        var data = JSON.stringify(this.noteTemplate);
-        this.network.sendRequest("POST", url, data, function () {
+        var data = JSON.stringify(this._noteTemplate);
+        this._network.sendRequest("POST", url, data, function () {
             _this.getNotes();
         });
     };
     Application.prototype.getNotes = function () {
         var _this = this;
         var url = "/api/v1/notes";
-        this.network.sendRequest("GET", url, null, function (data) {
+        this._network.sendRequest("GET", url, null, function (data) {
             var notes = data["data"];
-            _this.notesList.displayNotes(notes);
+            _this._notesList.displayNotes(notes);
         });
     };
     Application.prototype.backup = function () {
         // The Vapor docs indicate that one can pass
         // the current security token in the URL
         // https://docs.vapor.codes/2.0/auth/helper/
-        var url = "/api/v1/notes/backup?_authorizationBearer=" + this.network.securityToken;
+        var url = "/api/v1/notes/backup?_authorizationBearer=" + this._network.securityToken;
         // Courtesy of
         // https://stackoverflow.com/a/3749395/133764
-        this.downloadFrame['src'] = url;
+        this._downloadFrame['src'] = url;
     };
     Application.prototype.onSaveButtonClick = function (note) {
         var _this = this;
         var url = "/api/v1/notes/" + note.id;
         var data = JSON.stringify(note);
-        this.network.sendRequest("PUT", url, data, function () {
+        this._network.sendRequest("PUT", url, data, function () {
             _this.getNotes();
         });
     };
     Application.prototype.onDeleteNote = function (note) {
         var _this = this;
-        this.editor.disable();
+        this._editor.disable();
         var url = "/api/v1/notes/" + note.id;
-        this.network.sendRequest("DELETE", url, null, function () {
+        this._network.sendRequest("DELETE", url, null, function () {
             _this.getNotes();
         });
     };
     Application.prototype.onEditNote = function (note) {
-        this.editor.showNote(note);
+        this._editor.showNote(note);
     };
     Application.prototype.onPublishNote = function (note) {
         var _this = this;
         var url = "/api/v1/notes/" + note.id + "/publish";
-        this.network.sendRequest("PUT", url, null, function () {
+        this._network.sendRequest("PUT", url, null, function () {
             _this.getNotes();
         });
     };
     Application.prototype.onUnpublishNote = function (note) {
         var _this = this;
         var url = "/api/v1/notes/" + note.id + "/unpublish";
-        this.network.sendRequest("PUT", url, null, function () {
+        this._network.sendRequest("PUT", url, null, function () {
             _this.getNotes();
         });
     };

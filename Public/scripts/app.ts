@@ -1,22 +1,22 @@
 class Editor {
     public delegate: EditorDelegate = null;
-    private noteEditorDiv;
-    private titleField;
-    private contentsField;
-    private saveButton;
-    private currentNote = null;
+    private _noteEditorDiv;
+    private _titleField;
+    private _contentsField;
+    private _saveButton;
+    private _currentNote = null;
 
     constructor() {
-        this.noteEditorDiv = $('#noteEditorDiv');
-        this.titleField = $('#titleField');
-        this.contentsField = $('#contentsField');
-        this.saveButton = $('#saveButton');
+        this._noteEditorDiv = $('#noteEditorDiv');
+        this._titleField = $('#titleField');
+        this._contentsField = $('#contentsField');
+        this._saveButton = $('#saveButton');
 
-        this.saveButton.bind('click', () => {
+        this._saveButton.bind('click', () => {
             let data = {
-                "title": this.titleField.val(),
-                "contents": this.contentsField.val(),
-                "id": this.currentNote.id
+                "title": this._titleField.val(),
+                "contents": this._contentsField.val(),
+                "id": this._currentNote.id
             };
             if (this.delegate) {
                 this.delegate.onSaveButtonClick(data);
@@ -25,21 +25,21 @@ class Editor {
     }
 
     public enable(): void {
-        this.noteEditorDiv.show();
+        this._noteEditorDiv.show();
     }
 
     public disable(): void {
-        this.noteEditorDiv.hide();
-        this.titleField.val("");
-        this.contentsField.val("");
-        this.currentNote = null;
+        this._noteEditorDiv.hide();
+        this._titleField.val("");
+        this._contentsField.val("");
+        this._currentNote = null;
     }
 
     public showNote(note): void {
         this.enable();
-        this.currentNote = note;
-        this.titleField.val(note.title);
-        this.contentsField.val(note.contents);
+        this._currentNote = note;
+        this._titleField.val(note.title);
+        this._contentsField.val(note.contents);
     }
 }
 
@@ -49,14 +49,14 @@ interface EditorDelegate {
 
 class NotesList {
     public delegate: NotesListDelegate = null;
-    private notesDiv;
+    private _notesDiv;
 
     constructor() {
-        this.notesDiv = $('#notesDiv');
+        this._notesDiv = $('#notesDiv');
     }
 
     public empty(): void {
-        this.notesDiv.empty();
+        this._notesDiv.empty();
     }
 
     public displayNotes(notes): void {
@@ -94,7 +94,7 @@ class NotesList {
             }
             p.append("&nbsp;");
             p.append(deleteButton);
-            this.notesDiv.append(p);
+            this._notesDiv.append(p);
         }
     }
 }
@@ -107,41 +107,41 @@ interface NotesListDelegate {
 }
 
 class LoginForm {
-    private usernameField;
-    private passwordField;
-    private loginButton;
     public delegate: LoginFormDelegate = null;
+    private _usernameField;
+    private _passwordField;
+    private _loginButton;
 
     constructor() {
-        this.usernameField = $('#usernameField');
-        this.passwordField = $('#passwordField');
-        this.loginButton = $('#loginButton');
+        this._usernameField = $('#usernameField');
+        this._passwordField = $('#passwordField');
+        this._loginButton = $('#loginButton');
 
-        this.loginButton.bind('click', () => {
-            let user = this.usernameField.val();
-            let pass = this.passwordField.val();
+        this._loginButton.bind('click', () => {
+            let user = this._usernameField.val();
+            let pass = this._passwordField.val();
             this.delegate.onLogin(user, pass);
         });
     }
 
     public enable(): void {
-        this.usernameField.removeAttr("disabled");
-        this.passwordField.removeAttr("disabled");
-        this.loginButton.val("login");
-        this.loginButton.unbind('click');
-        this.loginButton.bind('click', () => {
-            let user = this.usernameField.val();
-            let pass = this.passwordField.val();
+        this._usernameField.removeAttr("disabled");
+        this._passwordField.removeAttr("disabled");
+        this._loginButton.val("login");
+        this._loginButton.unbind('click');
+        this._loginButton.bind('click', () => {
+            let user = this._usernameField.val();
+            let pass = this._passwordField.val();
             this.delegate.onLogin(user, pass);
         });
     }
 
     public disable(): void {
-        this.usernameField.attr("disabled", "disabled");
-        this.passwordField.attr("disabled", "disabled");
-        this.loginButton.val("logout");
-        this.loginButton.unbind('click');
-        this.loginButton.bind('click', () => {
+        this._usernameField.attr("disabled", "disabled");
+        this._passwordField.attr("disabled", "disabled");
+        this._loginButton.val("logout");
+        this._loginButton.unbind('click');
+        this._loginButton.bind('click', () => {
             this.delegate.onLogout();
         });
     }
@@ -153,25 +153,29 @@ interface LoginFormDelegate {
 }
 
 class NetworkComponent {
-    private beforeSendCallback = (xhr) => {};
-    public securityToken: String = null;
+    private _beforeSendCallback = (xhr) => {};
+    private _securityToken: String = null;
+
+    get securityToken(): String {
+        return this._securityToken;
+    }
 
     noAuth(): void {
-        this.securityToken = null;
-        this.beforeSendCallback = (xhr) => {};
+        this._securityToken = null;
+        this._beforeSendCallback = (xhr) => {};
     }
 
     basicAuth(username: String, password: String) {
-        this.securityToken = null;
-        this.beforeSendCallback = (xhr) => {
+        this._securityToken = null;
+        this._beforeSendCallback = (xhr) => {
             let token = btoa(username + ":" + password);
             xhr.setRequestHeader ("Authorization", "Basic " + token);
         };
     }
 
     tokenAuth(token: String): void {
-        this.securityToken = token;
-        this.beforeSendCallback = (xhr) => {
+        this._securityToken = token;
+        this._beforeSendCallback = (xhr) => {
             xhr.setRequestHeader ("Authorization", "Bearer " + token);
         };
     }
@@ -181,7 +185,7 @@ class NetworkComponent {
             type: method,
             url: url,
             contentType: "application/json; charset=utf-8",
-            beforeSend: this.beforeSendCallback,
+            beforeSend: this._beforeSendCallback,
             data: data,
             success: callback,
             error: () => {
@@ -192,72 +196,72 @@ class NetworkComponent {
 }
 
 class Application implements EditorDelegate, NotesListDelegate, LoginFormDelegate {
-    private createNoteButton;
-    private backupButton;
-    private downloadFrame;
-    private notesList = new NotesList();
-    private editor = new Editor();
-    private loginForm = new LoginForm();
-    private network = new NetworkComponent();
-    private noteTemplate = {
+    private _createNoteButton;
+    private _backupButton;
+    private _downloadFrame;
+    private _notesList = new NotesList();
+    private _editor = new Editor();
+    private _loginForm = new LoginForm();
+    private _network = new NetworkComponent();
+    private _noteTemplate = {
         "title": "New note",
         "contents": "New note contents"
     };
 
     constructor() {
-        this.createNoteButton = $('#createNoteButton');
-        this.backupButton = $('#backupButton');
-        this.downloadFrame = document.getElementById('downloadFrame');
+        this._createNoteButton = $('#createNoteButton');
+        this._backupButton = $('#backupButton');
+        this._downloadFrame = document.getElementById('downloadFrame');
 
-        this.editor.delegate = this;
-        this.notesList.delegate = this;
-        this.loginForm.delegate = this;
+        this._editor.delegate = this;
+        this._notesList.delegate = this;
+        this._loginForm.delegate = this;
 
-        this.createNoteButton.bind('click', () => {
+        this._createNoteButton.bind('click', () => {
             this.createNote();
         });
 
-        this.backupButton.bind('click', () => {
+        this._backupButton.bind('click', () => {
             this.backup();
         });
     }
 
     onLogin(user: String, pass: String): void {
         let url = "/api/v1/login";
-        this.network.basicAuth(user, pass);
-        this.network.sendRequest("POST", url, null, (data) => {
+        this._network.basicAuth(user, pass);
+        this._network.sendRequest("POST", url, null, (data) => {
             let securityToken = data["token"];
-            this.network.tokenAuth(securityToken);
-            this.createNoteButton.removeAttr("disabled");
-            this.backupButton.removeAttr("disabled");
-            this.loginForm.disable();
+            this._network.tokenAuth(securityToken);
+            this._createNoteButton.removeAttr("disabled");
+            this._backupButton.removeAttr("disabled");
+            this._loginForm.disable();
             this.getNotes();
         });
     }
 
     onLogout(): void {
-        this.editor.disable();
-        this.notesList.empty();
-        this.network.noAuth();
-        this.createNoteButton.attr("disabled", "disabled");
-        this.backupButton.attr("disabled", "disabled");
-        this.loginForm.enable();
+        this._editor.disable();
+        this._notesList.empty();
+        this._network.noAuth();
+        this._createNoteButton.attr("disabled", "disabled");
+        this._backupButton.attr("disabled", "disabled");
+        this._loginForm.enable();
     }
 
     public createNote(): void {
-        this.editor.disable();
+        this._editor.disable();
         let url = "/api/v1/notes";
-        let data = JSON.stringify(this.noteTemplate);
-        this.network.sendRequest("POST", url, data, () => {
+        let data = JSON.stringify(this._noteTemplate);
+        this._network.sendRequest("POST", url, data, () => {
             this.getNotes();
         });
     }
 
     public getNotes(): void {
         let url = "/api/v1/notes";
-        this.network.sendRequest("GET", url, null, (data) => {
+        this._network.sendRequest("GET", url, null, (data) => {
             let notes = data["data"];
-            this.notesList.displayNotes(notes);
+            this._notesList.displayNotes(notes);
         });
     }
 
@@ -265,42 +269,42 @@ class Application implements EditorDelegate, NotesListDelegate, LoginFormDelegat
         // The Vapor docs indicate that one can pass
         // the current security token in the URL
         // https://docs.vapor.codes/2.0/auth/helper/
-        let url = "/api/v1/notes/backup?_authorizationBearer=" + this.network.securityToken;
+        let url = "/api/v1/notes/backup?_authorizationBearer=" + this._network.securityToken;
         // Courtesy of
         // https://stackoverflow.com/a/3749395/133764
-        this.downloadFrame['src'] = url;
+        this._downloadFrame['src'] = url;
     }
 
     onSaveButtonClick(note): void {
         let url = "/api/v1/notes/" + note.id;
         let data = JSON.stringify(note);
-        this.network.sendRequest("PUT", url, data, () => {
+        this._network.sendRequest("PUT", url, data, () => {
             this.getNotes();
         });
     }
 
     onDeleteNote(note): void {
-        this.editor.disable();
+        this._editor.disable();
         let url = "/api/v1/notes/" + note.id;
-        this.network.sendRequest("DELETE", url, null, () => {
+        this._network.sendRequest("DELETE", url, null, () => {
             this.getNotes();
         });
     }
 
     onEditNote(note): void {
-        this.editor.showNote(note);
+        this._editor.showNote(note);
     }
 
     onPublishNote(note): void {
         let url = "/api/v1/notes/" + note.id + "/publish";
-        this.network.sendRequest("PUT", url, null, () => {
+        this._network.sendRequest("PUT", url, null, () => {
             this.getNotes();
         });
     }
 
     onUnpublishNote(note): void {
         let url = "/api/v1/notes/" + note.id + "/unpublish";
-        this.network.sendRequest("PUT", url, null, () => {
+        this._network.sendRequest("PUT", url, null, () => {
             this.getNotes();
         });
     }

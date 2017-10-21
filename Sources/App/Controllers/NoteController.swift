@@ -10,7 +10,7 @@ final class NoteController {
         if req.headers["Accept"] == "application/zip" {
             return try zip(req)
         }
-        let notes = try req.user().notes.all()
+        let notes = try req.user().notes.sort(Note.createdAtKey, .descending).all()
         let notesJSON = try notes.makeJSON()
         return try wrapJSONResponse(with: notesJSON)
     }
@@ -43,6 +43,23 @@ final class NoteController {
             print("Error: \(error)")
             throw Abort.serverError
         }
+    }
+
+    func search(_ req: Request) throws -> ResponseRepresentable {
+        if let query = req.data["query"]?.string {
+            print(query)
+            let notes = try req.user().notes
+                            .or { orGroup in
+                                try orGroup.filter("title", .contains, query)
+                                try orGroup.filter("contents", .contains, query)
+                            }
+                            .sort(Note.createdAtKey, .descending)
+                            .all()
+            let notesJSON = try notes.makeJSON()
+            return try wrapJSONResponse(with: notesJSON)
+        }
+        var json = JSON()
+        return try wrapJSONResponse(with: json)
     }
 
     /// When consumers call 'POST' on '/notes' with valid JSON

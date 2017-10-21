@@ -199,32 +199,53 @@ class Toolbar {
     public delegate: ToolbarDelegate = null;
     private _createNoteButton;
     private _backupButton;
+    private _searchField;
+    private _searchButton;
+    private _resetButton;
 
     constructor() {
         this._createNoteButton = $('#createNoteButton');
         this._backupButton = $('#backupButton');
+        this._searchField = $('#searchField');
+        this._searchButton = $('#searchButton');
+        this._resetButton = $('#resetButton');
         this._createNoteButton.bind('click', () => {
             this.delegate.onCreate();
         });
         this._backupButton.bind('click', () => {
             this.delegate.onBackup();
         });
+        this._searchButton.bind('click', () => {
+            let searchQuery = this._searchField.val();
+            this.delegate.onSearch(searchQuery);
+        });
+        this._resetButton.bind('click', () => {
+            this.delegate.onReset();
+        });
     }
 
     enable(): void {
         this._createNoteButton.removeAttr("disabled");
         this._backupButton.removeAttr("disabled");
+        this._searchField.removeAttr("disabled");
+        this._searchButton.removeAttr("disabled");
+        this._resetButton.removeAttr("disabled");
     }
 
     disable(): void {
         this._createNoteButton.attr("disabled", "disabled");
         this._backupButton.attr("disabled", "disabled");
+        this._searchField.attr("disabled", "disabled");
+        this._searchButton.attr("disabled", "disabled");
+        this._resetButton.attr("disabled", "disabled");
     }
 }
 
 interface ToolbarDelegate {
     onCreate(): void;
     onBackup(): void;
+    onSearch(query: String): void;
+    onReset(): void;
 }
 
 class Application implements EditorDelegate, NotesListDelegate, LoginFormDelegate, ToolbarDelegate {
@@ -292,6 +313,26 @@ class Application implements EditorDelegate, NotesListDelegate, LoginFormDelegat
         // Courtesy of
         // https://stackoverflow.com/a/3749395/133764
         this._downloadFrame['src'] = url;
+    }
+
+    onSearch(query: String): void {
+        this._editor.disable();
+        if (query === null || query.length == 0) {
+            this.getNotes();
+            return;
+        }
+        let url = "/api/v1/notes/search";
+        let obj = JSON.stringify({ "query": query });
+        this._network.sendRequest("POST", url, obj, (data) => {
+            let notes = data["data"];
+            console.dir(notes);
+            this._notesList.displayNotes(notes);
+        });
+    }
+
+    onReset(): void {
+        this._editor.disable();
+        this.getNotes();
     }
 
     onSaveNote(note): void {

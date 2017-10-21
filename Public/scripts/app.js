@@ -176,20 +176,36 @@ var Toolbar = (function () {
         this.delegate = null;
         this._createNoteButton = $('#createNoteButton');
         this._backupButton = $('#backupButton');
+        this._searchField = $('#searchField');
+        this._searchButton = $('#searchButton');
+        this._resetButton = $('#resetButton');
         this._createNoteButton.bind('click', function () {
             _this.delegate.onCreate();
         });
         this._backupButton.bind('click', function () {
             _this.delegate.onBackup();
         });
+        this._searchButton.bind('click', function () {
+            var searchQuery = _this._searchField.val();
+            _this.delegate.onSearch(searchQuery);
+        });
+        this._resetButton.bind('click', function () {
+            _this.delegate.onReset();
+        });
     }
     Toolbar.prototype.enable = function () {
         this._createNoteButton.removeAttr("disabled");
         this._backupButton.removeAttr("disabled");
+        this._searchField.removeAttr("disabled");
+        this._searchButton.removeAttr("disabled");
+        this._resetButton.removeAttr("disabled");
     };
     Toolbar.prototype.disable = function () {
         this._createNoteButton.attr("disabled", "disabled");
         this._backupButton.attr("disabled", "disabled");
+        this._searchField.attr("disabled", "disabled");
+        this._searchButton.attr("disabled", "disabled");
+        this._resetButton.attr("disabled", "disabled");
     };
     return Toolbar;
 }());
@@ -254,6 +270,25 @@ var Application = (function () {
         // Courtesy of
         // https://stackoverflow.com/a/3749395/133764
         this._downloadFrame['src'] = url;
+    };
+    Application.prototype.onSearch = function (query) {
+        var _this = this;
+        this._editor.disable();
+        if (query === null || query.length == 0) {
+            this.getNotes();
+            return;
+        }
+        var url = "/api/v1/notes/search";
+        var obj = JSON.stringify({ "query": query });
+        this._network.sendRequest("POST", url, obj, function (data) {
+            var notes = data["data"];
+            console.dir(notes);
+            _this._notesList.displayNotes(notes);
+        });
+    };
+    Application.prototype.onReset = function () {
+        this._editor.disable();
+        this.getNotes();
     };
     Application.prototype.onSaveNote = function (note) {
         var _this = this;

@@ -1,7 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="da14e329-022a-4460-8df5-3d7e6f5f8199" name="Default" comment="Refactored network calls in a single component" />
+    <list default="true" id="da14e329-022a-4460-8df5-3d7e6f5f8199" name="Default" comment="Refactored network calls in a single component">
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/index.html" afterPath="$PROJECT_DIR$/index.html" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/scripts/app.js" afterPath="$PROJECT_DIR$/scripts/app.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/scripts/app.js.map" afterPath="$PROJECT_DIR$/scripts/app.js.map" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/scripts/app.ts" afterPath="$PROJECT_DIR$/scripts/app.ts" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../Sources/App/Controllers/NoteController.swift" afterPath="$PROJECT_DIR$/../Sources/App/Controllers/NoteController.swift" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../Sources/App/Routes/Routes.swift" afterPath="$PROJECT_DIR$/../Sources/App/Routes/Routes.swift" />
+    </list>
     <ignored path="$PROJECT_DIR$/.tmp/" />
     <ignored path="$PROJECT_DIR$/temp/" />
     <ignored path="$PROJECT_DIR$/tmp/" />
@@ -18,7 +26,7 @@
         <entry file="file://$PROJECT_DIR$/index.html">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="289">
-              <caret line="17" column="72" lean-forward="false" selection-start-line="17" selection-start-column="72" selection-end-line="17" selection-end-column="72" />
+              <caret line="17" column="81" lean-forward="false" selection-start-line="17" selection-start-column="81" selection-end-line="17" selection-end-column="81" />
               <folding>
                 <element signature="n#style#0;n#iframe#0;n#body#0;n#html#0;n#!!top" expanded="true" />
               </folding>
@@ -29,8 +37,8 @@
       <file leaf-file-name="app.ts" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/scripts/app.ts">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="3655">
-              <caret line="215" column="50" lean-forward="false" selection-start-line="215" selection-start-column="50" selection-end-line="215" selection-end-column="50" />
+            <state relative-caret-position="499">
+              <caret line="334" column="24" lean-forward="false" selection-start-line="334" selection-start-column="24" selection-end-line="334" selection-end-column="24" />
               <folding />
             </state>
           </provider>
@@ -106,8 +114,8 @@
           <select />
         </subPane>
       </pane>
-      <pane id="Scratches" />
       <pane id="Scope" />
+      <pane id="Scratches" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -141,6 +149,7 @@
       <updated>1508513924186</updated>
       <workItem from="1508513926857" duration="8363000" />
       <workItem from="1508568281091" duration="8108000" />
+      <workItem from="1508590380937" duration="1398000" />
     </task>
     <task id="LOCAL-00001" summary="Refactored network calls in a single component">
       <created>1508572795040</created>
@@ -153,7 +162,7 @@
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="16471000" />
+    <option name="totallyTimeSpent" value="17869000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="119" y="24" width="1442" height="912" extended-state="6" />
@@ -202,6 +211,16 @@
     <watches-manager />
   </component>
   <component name="editorHistoryManager">
+    <entry file="file://$PROJECT_DIR$/index.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding>
+            <element signature="n#style#0;n#iframe#0;n#body#0;n#html#0;n#!!top" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/scripts/app.ts">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="2686">
@@ -214,7 +233,9 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="0">
           <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding />
+          <folding>
+            <element signature="n#style#0;n#iframe#0;n#body#0;n#html#0;n#!!top" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
@@ -222,7 +243,9 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="36">
           <caret line="2" column="0" lean-forward="true" selection-start-line="2" selection-start-column="0" selection-end-line="2" selection-end-column="0" />
-          <folding />
+          <folding>
+            <element signature="n#style#0;n#iframe#0;n#body#0;n#html#0;n#!!top" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
@@ -238,14 +261,13 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="0">
           <caret line="0" column="4" lean-forward="false" selection-start-line="0" selection-start-column="4" selection-end-line="0" selection-end-column="4" />
-          <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/index.html">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="289">
-          <caret line="17" column="72" lean-forward="false" selection-start-line="17" selection-start-column="72" selection-end-line="17" selection-end-column="72" />
+          <caret line="17" column="81" lean-forward="false" selection-start-line="17" selection-start-column="81" selection-end-line="17" selection-end-column="81" />
           <folding>
             <element signature="n#style#0;n#iframe#0;n#body#0;n#html#0;n#!!top" expanded="true" />
           </folding>
@@ -254,8 +276,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/scripts/app.ts">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="3655">
-          <caret line="215" column="50" lean-forward="false" selection-start-line="215" selection-start-column="50" selection-end-line="215" selection-end-column="50" />
+        <state relative-caret-position="499">
+          <caret line="334" column="24" lean-forward="false" selection-start-line="334" selection-start-column="24" selection-end-line="334" selection-end-column="24" />
           <folding />
         </state>
       </provider>

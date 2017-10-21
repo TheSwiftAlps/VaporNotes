@@ -106,6 +106,52 @@ interface NotesListDelegate {
     onUnpublishNote(note): void;
 }
 
+class LoginForm {
+    private usernameField;
+    private passwordField;
+    private loginButton;
+    public delegate: LoginFormDelegate = null;
+
+    constructor() {
+        this.usernameField = $('#usernameField');
+        this.passwordField = $('#passwordField');
+        this.loginButton = $('#loginButton');
+
+        this.loginButton.bind('click', () => {
+            let user = this.usernameField.val();
+            let pass = this.passwordField.val();
+            this.delegate.onLogin(user, pass);
+        });
+    }
+
+    public enable(): void {
+        this.usernameField.removeAttr("disabled");
+        this.passwordField.removeAttr("disabled");
+        this.loginButton.val("login");
+        this.loginButton.unbind('click');
+        this.loginButton.bind('click', () => {
+            let user = this.usernameField.val();
+            let pass = this.passwordField.val();
+            this.delegate.onLogin(user, pass);
+        });
+    }
+
+    public disable(): void {
+        this.usernameField.attr("disabled", "disabled");
+        this.passwordField.attr("disabled", "disabled");
+        this.loginButton.val("logout");
+        this.loginButton.unbind('click');
+        this.loginButton.bind('click', () => {
+            this.delegate.onLogout();
+        });
+    }
+}
+
+interface LoginFormDelegate {
+    onLogin(user: String, pass: String): void;
+    onLogout(): void;
+}
+
 enum AuthType {
     none,
     basic,
@@ -151,13 +197,11 @@ class NetworkComponent {
     }
 }
 
-class Application implements EditorDelegate, NotesListDelegate {
-    private usernameField;
-    private passwordField;
-    private loginButton;
+class Application implements EditorDelegate, NotesListDelegate, LoginFormDelegate {
     private createNoteButton;
     private notesList = new NotesList();
     private editor = new Editor();
+    private loginForm = new LoginForm();
     private network = new NetworkComponent();
     private noteTemplate = {
         "title": "New note",
@@ -165,55 +209,35 @@ class Application implements EditorDelegate, NotesListDelegate {
     };
 
     constructor() {
-        this.usernameField = $('#usernameField');
-        this.passwordField = $('#passwordField');
-        this.loginButton = $('#loginButton');
         this.createNoteButton = $('#createNoteButton');
 
         this.editor.delegate = this;
         this.notesList.delegate = this;
-
-        this.loginButton.bind('click', () => {
-            this.login();
-        });
+        this.loginForm.delegate = this;
 
         this.createNoteButton.bind('click', () => {
             this.createNote();
         });
     }
 
-    public login(): void {
+    onLogin(user: String, pass: String): void {
         let url = "/api/v1/login";
-        let user = this.usernameField.val();
-        let pass = this.passwordField.val();
         this.network.basicAuth(user, pass);
         this.network.sendRequest("POST", url, null, (data) => {
             let securityToken = data["token"];
             this.network.tokenAuth(securityToken);
-            this.getNotes();
-            this.usernameField.attr("disabled", "disabled");
-            this.passwordField.attr("disabled", "disabled");
             this.createNoteButton.removeAttr("disabled");
-            this.loginButton.val("logout");
-            this.loginButton.unbind('click');
-            this.loginButton.bind('click', () => {
-                this.logout();
-            });
+            this.loginForm.disable();
+            this.getNotes();
         });
     }
 
-    public logout(): void {
+    onLogout(): void {
         this.editor.disable();
         this.notesList.empty();
         this.network.noAuth();
-        this.usernameField.removeAttr("disabled");
-        this.passwordField.removeAttr("disabled");
         this.createNoteButton.attr("disabled", "disabled");
-        this.loginButton.val("login");
-        this.loginButton.unbind('click');
-        this.loginButton.bind('click', () => {
-            this.login();
-        });
+        this.loginForm.enable();
     }
 
     public createNote(): void {

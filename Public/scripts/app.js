@@ -89,6 +89,43 @@ var NotesList = (function () {
     };
     return NotesList;
 }());
+var LoginForm = (function () {
+    function LoginForm() {
+        var _this = this;
+        this.delegate = null;
+        this.usernameField = $('#usernameField');
+        this.passwordField = $('#passwordField');
+        this.loginButton = $('#loginButton');
+        this.loginButton.bind('click', function () {
+            var user = _this.usernameField.val();
+            var pass = _this.passwordField.val();
+            _this.delegate.onLogin(user, pass);
+        });
+    }
+    LoginForm.prototype.enable = function () {
+        var _this = this;
+        this.usernameField.removeAttr("disabled");
+        this.passwordField.removeAttr("disabled");
+        this.loginButton.val("login");
+        this.loginButton.unbind('click');
+        this.loginButton.bind('click', function () {
+            var user = _this.usernameField.val();
+            var pass = _this.passwordField.val();
+            _this.delegate.onLogin(user, pass);
+        });
+    };
+    LoginForm.prototype.disable = function () {
+        var _this = this;
+        this.usernameField.attr("disabled", "disabled");
+        this.passwordField.attr("disabled", "disabled");
+        this.loginButton.val("logout");
+        this.loginButton.unbind('click');
+        this.loginButton.bind('click', function () {
+            _this.delegate.onLogout();
+        });
+    };
+    return LoginForm;
+}());
 var AuthType;
 (function (AuthType) {
     AuthType[AuthType["none"] = 0] = "none";
@@ -137,57 +174,38 @@ var Application = (function () {
         var _this = this;
         this.notesList = new NotesList();
         this.editor = new Editor();
+        this.loginForm = new LoginForm();
         this.network = new NetworkComponent();
         this.noteTemplate = {
             "title": "New note",
             "contents": "New note contents"
         };
-        this.usernameField = $('#usernameField');
-        this.passwordField = $('#passwordField');
-        this.loginButton = $('#loginButton');
         this.createNoteButton = $('#createNoteButton');
         this.editor.delegate = this;
         this.notesList.delegate = this;
-        this.loginButton.bind('click', function () {
-            _this.login();
-        });
+        this.loginForm.delegate = this;
         this.createNoteButton.bind('click', function () {
             _this.createNote();
         });
     }
-    Application.prototype.login = function () {
+    Application.prototype.onLogin = function (user, pass) {
         var _this = this;
         var url = "/api/v1/login";
-        var user = this.usernameField.val();
-        var pass = this.passwordField.val();
         this.network.basicAuth(user, pass);
         this.network.sendRequest("POST", url, null, function (data) {
             var securityToken = data["token"];
             _this.network.tokenAuth(securityToken);
-            _this.getNotes();
-            _this.usernameField.attr("disabled", "disabled");
-            _this.passwordField.attr("disabled", "disabled");
             _this.createNoteButton.removeAttr("disabled");
-            _this.loginButton.val("logout");
-            _this.loginButton.unbind('click');
-            _this.loginButton.bind('click', function () {
-                _this.logout();
-            });
+            _this.loginForm.disable();
+            _this.getNotes();
         });
     };
-    Application.prototype.logout = function () {
-        var _this = this;
+    Application.prototype.onLogout = function () {
         this.editor.disable();
         this.notesList.empty();
         this.network.noAuth();
-        this.usernameField.removeAttr("disabled");
-        this.passwordField.removeAttr("disabled");
         this.createNoteButton.attr("disabled", "disabled");
-        this.loginButton.val("login");
-        this.loginButton.unbind('click');
-        this.loginButton.bind('click', function () {
-            _this.login();
-        });
+        this.loginForm.enable();
     };
     Application.prototype.createNote = function () {
         var _this = this;

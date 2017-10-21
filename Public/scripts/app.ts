@@ -1,10 +1,10 @@
 class Editor {
+    public delegate: EditorDelegate = null;
     private noteEditorDiv;
     private titleField;
     private contentsField;
     private saveButton;
     private currentNote = null;
-    public delegate: EditorDelegate = null;
 
     constructor() {
         this.noteEditorDiv = $('#noteEditorDiv');
@@ -26,16 +26,10 @@ class Editor {
 
     public enable(): void {
         this.noteEditorDiv.show();
-        this.saveButton.removeAttr("disabled");
-        this.titleField.removeAttr("disabled");
-        this.contentsField.removeAttr("disabled");
     }
 
     public disable(): void {
         this.noteEditorDiv.hide();
-        this.saveButton.attr("disabled", "disabled");
-        this.titleField.attr("disabled", "disabled");
-        this.contentsField.attr("disabled", "disabled");
         this.titleField.val("");
         this.contentsField.val("");
         this.currentNote = null;
@@ -54,8 +48,8 @@ interface EditorDelegate {
 }
 
 class NotesList {
-    private notesDiv;
     public delegate: NotesListDelegate = null;
+    private notesDiv;
 
     constructor() {
         this.notesDiv = $('#notesDiv');
@@ -112,14 +106,59 @@ interface NotesListDelegate {
     onUnpublishNote(note): void;
 }
 
+enum AuthType {
+    none,
+    basic,
+    token
+}
+
+class NetworkComponent {
+    private auth = AuthType.none;
+    private beforeSendCallback = (xhr) => {};
+
+    noAuth(): void {
+        this.auth = AuthType.none;
+        this.beforeSendCallback = (xhr) => {};
+    }
+
+    basicAuth(username: String, password: String) {
+        this.auth = AuthType.basic;
+        this.beforeSendCallback = (xhr) => {
+            let token = btoa(username + ":" + password);
+            xhr.setRequestHeader ("Authorization", "Basic " + token);
+        };
+    }
+
+    tokenAuth(token: String): void {
+        this.auth = AuthType.token;
+        this.beforeSendCallback = (xhr) => {
+            xhr.setRequestHeader ("Authorization", "Bearer " + token);
+        };
+    }
+
+    sendRequest(method: String, url: String, data, callback): void {
+        $.ajax({
+            type: method,
+            url: url,
+            contentType: "application/json; charset=utf-8",
+            beforeSend: this.beforeSendCallback,
+            data: data,
+            success: callback,
+            error: () => {
+                alert("Request failed");
+            }
+        });
+    }
+}
+
 class Application implements EditorDelegate, NotesListDelegate {
     private usernameField;
     private passwordField;
     private loginButton;
     private createNoteButton;
-    private securityToken = null;
     private notesList = new NotesList();
     private editor = new Editor();
+    private network = new NetworkComponent();
     private noteTemplate = {
         "title": "New note",
         "contents": "New note contents"
@@ -144,36 +183,29 @@ class Application implements EditorDelegate, NotesListDelegate {
     }
 
     public login(): void {
-        $.ajax({
-            type: "POST",
-            url: "/api/v1/login",
-            contentType: "application/json; charset=utf-8",
-            beforeSend: (xhr) => {
-                let token = btoa(this.usernameField.val() + ":" + this.passwordField.val());
-                xhr.setRequestHeader ("Authorization", "Basic " + token);
-            },
-            success: (data) => {
-                this.securityToken = data["token"];
-                this.getNotes();
-                this.usernameField.attr("disabled", "disabled");
-                this.passwordField.attr("disabled", "disabled");
-                this.createNoteButton.removeAttr("disabled");
-                this.loginButton.val("logout");
-                this.loginButton.unbind('click');
-                this.loginButton.bind('click', () => {
-                    this.logout();
-                });
-            },
-            error: () => {
-                alert("Wrong credentials");
-            },
+        let url = "/api/v1/login";
+        let user = this.usernameField.val();
+        let pass = this.passwordField.val();
+        this.network.basicAuth(user, pass);
+        this.network.sendRequest("POST", url, null, (data) => {
+            let securityToken = data["token"];
+            this.network.tokenAuth(securityToken);
+            this.getNotes();
+            this.usernameField.attr("disabled", "disabled");
+            this.passwordField.attr("disabled", "disabled");
+            this.createNoteButton.removeAttr("disabled");
+            this.loginButton.val("logout");
+            this.loginButton.unbind('click');
+            this.loginButton.bind('click', () => {
+                this.logout();
+            });
         });
     }
 
     public logout(): void {
         this.editor.disable();
         this.notesList.empty();
-        this.securityToken = null;
+        this.network.noAuth();
         this.usernameField.removeAttr("disabled");
         this.passwordField.removeAttr("disabled");
         this.createNoteButton.attr("disabled", "disabled");
@@ -185,81 +217,36 @@ class Application implements EditorDelegate, NotesListDelegate {
     }
 
     public createNote(): void {
-        if (this.securityToken !== null) {
-            this.editor.disable();
-            $.ajax({
-                type: "POST",
-                url: "/api/v1/notes",
-                contentType: "application/json; charset=utf-8",
-                data: JSON.stringify(this.noteTemplate),
-                beforeSend: (xhr) => {
-                    xhr.setRequestHeader ("Authorization", "Bearer " + this.securityToken);
-                },
-                success: () => {
-                    this.getNotes();
-                },
-            });
-        }
-        else {
-            alert("Please login first");
-        }
+        this.editor.disable();
+        let url = "/api/v1/notes";
+        let data = JSON.stringify(this.noteTemplate);
+        this.network.sendRequest("POST", url, data, () => {
+            this.getNotes();
+        });
     }
 
     public getNotes(): void {
-        if (this.securityToken !== null) {
-            $.ajax({
-                type: "GET",
-                contentType: "application/json; charset=utf-8",
-                url: "/api/v1/notes",
-                beforeSend: (xhr) => {
-                    xhr.setRequestHeader ("Authorization", "Bearer " + this.securityToken);
-                },
-                success: (data) => {
-                    let notes = data["data"];
-                    this.notesList.displayNotes(notes);
-                },
-            });
-        }
-        else {
-            alert("Please login first");
-        }
+        let url = "/api/v1/notes";
+        this.network.sendRequest("GET", url, null, (data) => {
+            let notes = data["data"];
+            this.notesList.displayNotes(notes);
+        });
     }
 
     onSaveButtonClick(note): void {
-        if (this.securityToken !== null && note !== null) {
-            $.ajax({
-                type: "PUT",
-                contentType: "application/json; charset=utf-8",
-                url: "/api/v1/notes/" + note.id,
-                data: JSON.stringify(note),
-                beforeSend: (xhr) => {
-                    xhr.setRequestHeader ("Authorization", "Bearer " + this.securityToken);
-                },
-                success: () => {
-                    this.getNotes();
-                },
-            });
-        }
+        let url = "/api/v1/notes/" + note.id;
+        let data = JSON.stringify(note);
+        this.network.sendRequest("PUT", url, data, () => {
+            this.getNotes();
+        });
     }
 
     onDeleteNote(note): void {
-        if (this.securityToken !== null) {
-            this.editor.disable();
-            $.ajax({
-                type: "DELETE",
-                contentType: "application/json; charset=utf-8",
-                url: "/api/v1/notes/" + note.id,
-                beforeSend: (xhr) => {
-                    xhr.setRequestHeader ("Authorization", "Bearer " + this.securityToken);
-                },
-                success: () => {
-                    this.getNotes();
-                },
-            });
-        }
-        else {
-            alert("Please login first");
-        }
+        this.editor.disable();
+        let url = "/api/v1/notes/" + note.id;
+        this.network.sendRequest("DELETE", url, null, () => {
+            this.getNotes();
+        });
     }
 
     onEditNote(note): void {
@@ -267,35 +254,17 @@ class Application implements EditorDelegate, NotesListDelegate {
     }
 
     onPublishNote(note): void {
-        if (this.securityToken !== null) {
-            $.ajax({
-                type: "PUT",
-                contentType: "application/json; charset=utf-8",
-                url: "/api/v1/notes/" + note.id + "/publish",
-                beforeSend: (xhr) => {
-                    xhr.setRequestHeader ("Authorization", "Bearer " + this.securityToken);
-                },
-                success: () => {
-                    this.getNotes();
-                },
-            });
-        }
+        let url = "/api/v1/notes/" + note.id + "/publish";
+        this.network.sendRequest("PUT", url, null, () => {
+            this.getNotes();
+        });
     }
 
     onUnpublishNote(note): void {
-        if (this.securityToken !== null) {
-            $.ajax({
-                type: "PUT",
-                contentType: "application/json; charset=utf-8",
-                url: "/api/v1/notes/" + note.id + "/unpublish",
-                beforeSend: (xhr) => {
-                    xhr.setRequestHeader ("Authorization", "Bearer " + this.securityToken);
-                },
-                success: () => {
-                    this.getNotes();
-                },
-            });
-        }
+        let url = "/api/v1/notes/" + note.id + "/unpublish";
+        this.network.sendRequest("PUT", url, null, () => {
+            this.getNotes();
+        });
     }
 }
 

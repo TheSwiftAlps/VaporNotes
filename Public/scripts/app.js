@@ -1,8 +1,8 @@
 var Editor = (function () {
     function Editor() {
         var _this = this;
-        this.currentNote = null;
         this.delegate = null;
+        this.currentNote = null;
         this.noteEditorDiv = $('#noteEditorDiv');
         this.titleField = $('#titleField');
         this.contentsField = $('#contentsField');
@@ -20,15 +20,9 @@ var Editor = (function () {
     }
     Editor.prototype.enable = function () {
         this.noteEditorDiv.show();
-        this.saveButton.removeAttr("disabled");
-        this.titleField.removeAttr("disabled");
-        this.contentsField.removeAttr("disabled");
     };
     Editor.prototype.disable = function () {
         this.noteEditorDiv.hide();
-        this.saveButton.attr("disabled", "disabled");
-        this.titleField.attr("disabled", "disabled");
-        this.contentsField.attr("disabled", "disabled");
         this.titleField.val("");
         this.contentsField.val("");
         this.currentNote = null;
@@ -95,12 +89,55 @@ var NotesList = (function () {
     };
     return NotesList;
 }());
+var AuthType;
+(function (AuthType) {
+    AuthType[AuthType["none"] = 0] = "none";
+    AuthType[AuthType["basic"] = 1] = "basic";
+    AuthType[AuthType["token"] = 2] = "token";
+})(AuthType || (AuthType = {}));
+var NetworkComponent = (function () {
+    function NetworkComponent() {
+        this.auth = AuthType.none;
+        this.beforeSendCallback = function (xhr) { };
+    }
+    NetworkComponent.prototype.noAuth = function () {
+        this.auth = AuthType.none;
+        this.beforeSendCallback = function (xhr) { };
+    };
+    NetworkComponent.prototype.basicAuth = function (username, password) {
+        this.auth = AuthType.basic;
+        this.beforeSendCallback = function (xhr) {
+            var token = btoa(username + ":" + password);
+            xhr.setRequestHeader("Authorization", "Basic " + token);
+        };
+    };
+    NetworkComponent.prototype.tokenAuth = function (token) {
+        this.auth = AuthType.token;
+        this.beforeSendCallback = function (xhr) {
+            xhr.setRequestHeader("Authorization", "Bearer " + token);
+        };
+    };
+    NetworkComponent.prototype.sendRequest = function (method, url, data, callback) {
+        $.ajax({
+            type: method,
+            url: url,
+            contentType: "application/json; charset=utf-8",
+            beforeSend: this.beforeSendCallback,
+            data: data,
+            success: callback,
+            error: function () {
+                alert("Request failed");
+            }
+        });
+    };
+    return NetworkComponent;
+}());
 var Application = (function () {
     function Application() {
         var _this = this;
-        this.securityToken = null;
         this.notesList = new NotesList();
         this.editor = new Editor();
+        this.network = new NetworkComponent();
         this.noteTemplate = {
             "title": "New note",
             "contents": "New note contents"
@@ -120,36 +157,29 @@ var Application = (function () {
     }
     Application.prototype.login = function () {
         var _this = this;
-        $.ajax({
-            type: "POST",
-            url: "/api/v1/login",
-            contentType: "application/json; charset=utf-8",
-            beforeSend: function (xhr) {
-                var token = btoa(_this.usernameField.val() + ":" + _this.passwordField.val());
-                xhr.setRequestHeader("Authorization", "Basic " + token);
-            },
-            success: function (data) {
-                _this.securityToken = data["token"];
-                _this.getNotes();
-                _this.usernameField.attr("disabled", "disabled");
-                _this.passwordField.attr("disabled", "disabled");
-                _this.createNoteButton.removeAttr("disabled");
-                _this.loginButton.val("logout");
-                _this.loginButton.unbind('click');
-                _this.loginButton.bind('click', function () {
-                    _this.logout();
-                });
-            },
-            error: function () {
-                alert("Wrong credentials");
-            },
+        var url = "/api/v1/login";
+        var user = this.usernameField.val();
+        var pass = this.passwordField.val();
+        this.network.basicAuth(user, pass);
+        this.network.sendRequest("POST", url, null, function (data) {
+            var securityToken = data["token"];
+            _this.network.tokenAuth(securityToken);
+            _this.getNotes();
+            _this.usernameField.attr("disabled", "disabled");
+            _this.passwordField.attr("disabled", "disabled");
+            _this.createNoteButton.removeAttr("disabled");
+            _this.loginButton.val("logout");
+            _this.loginButton.unbind('click');
+            _this.loginButton.bind('click', function () {
+                _this.logout();
+            });
         });
     };
     Application.prototype.logout = function () {
         var _this = this;
         this.editor.disable();
         this.notesList.empty();
-        this.securityToken = null;
+        this.network.noAuth();
         this.usernameField.removeAttr("disabled");
         this.passwordField.removeAttr("disabled");
         this.createNoteButton.attr("disabled", "disabled");
@@ -161,116 +191,53 @@ var Application = (function () {
     };
     Application.prototype.createNote = function () {
         var _this = this;
-        if (this.securityToken !== null) {
-            this.editor.disable();
-            $.ajax({
-                type: "POST",
-                url: "/api/v1/notes",
-                contentType: "application/json; charset=utf-8",
-                data: JSON.stringify(this.noteTemplate),
-                beforeSend: function (xhr) {
-                    xhr.setRequestHeader("Authorization", "Bearer " + _this.securityToken);
-                },
-                success: function () {
-                    _this.getNotes();
-                },
-            });
-        }
-        else {
-            alert("Please login first");
-        }
+        this.editor.disable();
+        var url = "/api/v1/notes";
+        var data = JSON.stringify(this.noteTemplate);
+        this.network.sendRequest("POST", url, data, function () {
+            _this.getNotes();
+        });
     };
     Application.prototype.getNotes = function () {
         var _this = this;
-        if (this.securityToken !== null) {
-            $.ajax({
-                type: "GET",
-                contentType: "application/json; charset=utf-8",
-                url: "/api/v1/notes",
-                beforeSend: function (xhr) {
-                    xhr.setRequestHeader("Authorization", "Bearer " + _this.securityToken);
-                },
-                success: function (data) {
-                    var notes = data["data"];
-                    _this.notesList.displayNotes(notes);
-                },
-            });
-        }
-        else {
-            alert("Please login first");
-        }
+        var url = "/api/v1/notes";
+        this.network.sendRequest("GET", url, null, function (data) {
+            var notes = data["data"];
+            _this.notesList.displayNotes(notes);
+        });
     };
     Application.prototype.onSaveButtonClick = function (note) {
         var _this = this;
-        if (this.securityToken !== null && note !== null) {
-            $.ajax({
-                type: "PUT",
-                contentType: "application/json; charset=utf-8",
-                url: "/api/v1/notes/" + note.id,
-                data: JSON.stringify(note),
-                beforeSend: function (xhr) {
-                    xhr.setRequestHeader("Authorization", "Bearer " + _this.securityToken);
-                },
-                success: function () {
-                    _this.getNotes();
-                },
-            });
-        }
+        var url = "/api/v1/notes/" + note.id;
+        var data = JSON.stringify(note);
+        this.network.sendRequest("PUT", url, data, function () {
+            _this.getNotes();
+        });
     };
     Application.prototype.onDeleteNote = function (note) {
         var _this = this;
-        if (this.securityToken !== null) {
-            this.editor.disable();
-            $.ajax({
-                type: "DELETE",
-                contentType: "application/json; charset=utf-8",
-                url: "/api/v1/notes/" + note.id,
-                beforeSend: function (xhr) {
-                    xhr.setRequestHeader("Authorization", "Bearer " + _this.securityToken);
-                },
-                success: function () {
-                    _this.getNotes();
-                },
-            });
-        }
-        else {
-            alert("Please login first");
-        }
+        this.editor.disable();
+        var url = "/api/v1/notes/" + note.id;
+        this.network.sendRequest("DELETE", url, null, function () {
+            _this.getNotes();
+        });
     };
     Application.prototype.onEditNote = function (note) {
         this.editor.showNote(note);
     };
     Application.prototype.onPublishNote = function (note) {
         var _this = this;
-        if (this.securityToken !== null) {
-            $.ajax({
-                type: "PUT",
-                contentType: "application/json; charset=utf-8",
-                url: "/api/v1/notes/" + note.id + "/publish",
-                beforeSend: function (xhr) {
-                    xhr.setRequestHeader("Authorization", "Bearer " + _this.securityToken);
-                },
-                success: function () {
-                    _this.getNotes();
-                },
-            });
-        }
+        var url = "/api/v1/notes/" + note.id + "/publish";
+        this.network.sendRequest("PUT", url, null, function () {
+            _this.getNotes();
+        });
     };
     Application.prototype.onUnpublishNote = function (note) {
         var _this = this;
-        if (this.securityToken !== null) {
-            $.ajax({
-                type: "PUT",
-                contentType: "application/json; charset=utf-8",
-                url: "/api/v1/notes/" + note.id + "/unpublish",
-                beforeSend: function (xhr) {
-                    xhr.setRequestHeader("Authorization", "Bearer " + _this.securityToken);
-                },
-                success: function () {
-                    _this.getNotes();
-                },
-            });
-        }
+        var url = "/api/v1/notes/" + note.id + "/unpublish";
+        this.network.sendRequest("PUT", url, null, function () {
+            _this.getNotes();
+        });
     };
     return Application;
 }());

@@ -1,16 +1,67 @@
-class Application {
+class Editor {
+    private noteEditorDiv;
+    private titleField;
+    private contentsField;
+    private saveButton;
+    private currentNote = null;
+    public delegate: EditorDelegate = null;
+
+    constructor() {
+        this.noteEditorDiv = $('#noteEditorDiv');
+        this.titleField = $('#titleField');
+        this.contentsField = $('#contentsField');
+        this.saveButton = $('#saveButton');
+
+        this.saveButton.bind('click', () => {
+            let data = {
+                "title": this.titleField.val(),
+                "contents": this.contentsField.val(),
+                "id": this.currentNote.id
+            };
+            if (this.delegate) {
+                this.delegate.onSaveButtonClick(this, data);
+            }
+        });
+    }
+
+    public enable(): void {
+        this.noteEditorDiv.show();
+        this.saveButton.removeAttr("disabled");
+        this.titleField.removeAttr("disabled");
+        this.contentsField.removeAttr("disabled");
+    }
+
+    public disable(): void {
+        this.noteEditorDiv.hide();
+        this.saveButton.attr("disabled", "disabled");
+        this.titleField.attr("disabled", "disabled");
+        this.contentsField.attr("disabled", "disabled");
+        this.titleField.val("");
+        this.contentsField.val("");
+        this.currentNote = null;
+    }
+
+    public showNote(note): void {
+        this.enable();
+        this.currentNote = note;
+        this.titleField.val(note.title);
+        this.contentsField.val(note.contents);
+    }
+}
+
+interface EditorDelegate {
+    onSaveButtonClick(editor: Editor, note);
+}
+
+class Application implements EditorDelegate {
     private usernameField;
     private passwordField;
     private loginButton;
     private createNoteButton;
     private notesDiv;
-    private noteEditor;
-    private titleEditor;
-    private contentsEditor;
-    private saveButton;
     private securityToken = null;
     private notes = null;
-    private currentNote = null;
+    private editor = new Editor();
     private noteTemplate = {
         "title": "New note",
         "contents": "New note contents"
@@ -22,10 +73,8 @@ class Application {
         this.loginButton = $('#loginButton');
         this.createNoteButton = $('#createNoteButton');
         this.notesDiv = $('#notesDiv');
-        this.noteEditor = $('#noteEditor');
-        this.titleEditor = $('#titleEditor');
-        this.contentsEditor = $('#contentsEditor');
-        this.saveButton = $('#saveButton');
+
+        this.editor.delegate = this;
 
         this.loginButton.bind('click', () => {
             this.login();
@@ -33,10 +82,6 @@ class Application {
 
         this.createNoteButton.bind('click', () => {
             this.createNote();
-        });
-
-        this.saveButton.bind('click', () => {
-            this.saveCurrentNote();
         });
     }
 
@@ -68,6 +113,7 @@ class Application {
     }
 
     public logout(): void {
+        this.editor.disable();
         this.notesDiv.empty();
         this.securityToken = null;
         this.usernameField.removeAttr("disabled");
@@ -82,7 +128,7 @@ class Application {
 
     public createNote(): void {
         if (this.securityToken !== null) {
-            this.disableEditor();
+            this.editor.disable();
             $.ajax({
                 type: "POST",
                 url: "/api/v1/notes",
@@ -123,7 +169,7 @@ class Application {
 
     public deleteNote(id): void {
         if (this.securityToken !== null) {
-            this.disableEditor();
+            this.editor.disable();
             $.ajax({
                 type: "DELETE",
                 contentType: "application/json; charset=utf-8",
@@ -141,41 +187,13 @@ class Application {
         }
     }
 
-    public viewNote(note): void {
-        this.enableEditor();
-        this.currentNote = note;
-        this.titleEditor.val(note.title);
-        this.contentsEditor.val(note.contents);
-    }
-
-    public enableEditor(): void {
-        this.noteEditor.show();
-        this.saveButton.removeAttr("disabled");
-        this.titleEditor.removeAttr("disabled");
-        this.contentsEditor.removeAttr("disabled");
-    }
-
-    public disableEditor(): void {
-        this.noteEditor.hide();
-        this.saveButton.attr("disabled", "disabled");
-        this.titleEditor.attr("disabled", "disabled");
-        this.contentsEditor.attr("disabled", "disabled");
-        this.titleEditor.val("");
-        this.contentsEditor.val("");
-        this.currentNote = null;
-    }
-
-    public saveCurrentNote(): void {
-        if (this.securityToken !== null && this.currentNote !== null) {
-            let data = {
-                "title": this.titleEditor.val(),
-                "contents": this.contentsEditor.val()
-            };
+    public onSaveButtonClick(editor, note): void {
+        if (this.securityToken !== null && note !== null) {
             $.ajax({
                 type: "PUT",
                 contentType: "application/json; charset=utf-8",
-                url: "/api/v1/notes/" + this.currentNote.id,
-                data: JSON.stringify(data),
+                url: "/api/v1/notes/" + note.id,
+                data: JSON.stringify(note),
                 beforeSend: (xhr) => {
                     xhr.setRequestHeader ("Authorization", "Bearer " + this.securityToken);
                 },
@@ -224,7 +242,7 @@ class Application {
             let p = $("<p>");
             let editButton = $('<input type="button" value="edit">');
             editButton.bind('click', () => {
-                this.viewNote(note);
+                this.editor.showNote(note);
             });
             let deleteButton = $('<input type="button" value="delete">');
             deleteButton.bind('click', () => {

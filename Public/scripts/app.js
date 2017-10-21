@@ -1,9 +1,52 @@
+var Editor = (function () {
+    function Editor() {
+        var _this = this;
+        this.currentNote = null;
+        this.delegate = null;
+        this.noteEditorDiv = $('#noteEditorDiv');
+        this.titleField = $('#titleField');
+        this.contentsField = $('#contentsField');
+        this.saveButton = $('#saveButton');
+        this.saveButton.bind('click', function () {
+            var data = {
+                "title": _this.titleField.val(),
+                "contents": _this.contentsField.val(),
+                "id": _this.currentNote.id
+            };
+            if (_this.delegate) {
+                _this.delegate.onSaveButtonClick(_this, data);
+            }
+        });
+    }
+    Editor.prototype.enable = function () {
+        this.noteEditorDiv.show();
+        this.saveButton.removeAttr("disabled");
+        this.titleField.removeAttr("disabled");
+        this.contentsField.removeAttr("disabled");
+    };
+    Editor.prototype.disable = function () {
+        this.noteEditorDiv.hide();
+        this.saveButton.attr("disabled", "disabled");
+        this.titleField.attr("disabled", "disabled");
+        this.contentsField.attr("disabled", "disabled");
+        this.titleField.val("");
+        this.contentsField.val("");
+        this.currentNote = null;
+    };
+    Editor.prototype.showNote = function (note) {
+        this.enable();
+        this.currentNote = note;
+        this.titleField.val(note.title);
+        this.contentsField.val(note.contents);
+    };
+    return Editor;
+}());
 var Application = (function () {
     function Application() {
         var _this = this;
         this.securityToken = null;
         this.notes = null;
-        this.currentNote = null;
+        this.editor = new Editor();
         this.noteTemplate = {
             "title": "New note",
             "contents": "New note contents"
@@ -13,18 +56,12 @@ var Application = (function () {
         this.loginButton = $('#loginButton');
         this.createNoteButton = $('#createNoteButton');
         this.notesDiv = $('#notesDiv');
-        this.noteEditor = $('#noteEditor');
-        this.titleEditor = $('#titleEditor');
-        this.contentsEditor = $('#contentsEditor');
-        this.saveButton = $('#saveButton');
+        this.editor.delegate = this;
         this.loginButton.bind('click', function () {
             _this.login();
         });
         this.createNoteButton.bind('click', function () {
             _this.createNote();
-        });
-        this.saveButton.bind('click', function () {
-            _this.saveCurrentNote();
         });
     }
     Application.prototype.login = function () {
@@ -56,6 +93,7 @@ var Application = (function () {
     };
     Application.prototype.logout = function () {
         var _this = this;
+        this.editor.disable();
         this.notesDiv.empty();
         this.securityToken = null;
         this.usernameField.removeAttr("disabled");
@@ -70,7 +108,7 @@ var Application = (function () {
     Application.prototype.createNote = function () {
         var _this = this;
         if (this.securityToken !== null) {
-            this.disableEditor();
+            this.editor.disable();
             $.ajax({
                 type: "POST",
                 url: "/api/v1/notes",
@@ -111,7 +149,7 @@ var Application = (function () {
     Application.prototype.deleteNote = function (id) {
         var _this = this;
         if (this.securityToken !== null) {
-            this.disableEditor();
+            this.editor.disable();
             $.ajax({
                 type: "DELETE",
                 contentType: "application/json; charset=utf-8",
@@ -128,39 +166,14 @@ var Application = (function () {
             alert("Please login first");
         }
     };
-    Application.prototype.viewNote = function (note) {
-        this.enableEditor();
-        this.currentNote = note;
-        this.titleEditor.val(note.title);
-        this.contentsEditor.val(note.contents);
-    };
-    Application.prototype.enableEditor = function () {
-        this.noteEditor.show();
-        this.saveButton.removeAttr("disabled");
-        this.titleEditor.removeAttr("disabled");
-        this.contentsEditor.removeAttr("disabled");
-    };
-    Application.prototype.disableEditor = function () {
-        this.noteEditor.hide();
-        this.saveButton.attr("disabled", "disabled");
-        this.titleEditor.attr("disabled", "disabled");
-        this.contentsEditor.attr("disabled", "disabled");
-        this.titleEditor.val("");
-        this.contentsEditor.val("");
-        this.currentNote = null;
-    };
-    Application.prototype.saveCurrentNote = function () {
+    Application.prototype.onSaveButtonClick = function (editor, note) {
         var _this = this;
-        if (this.securityToken !== null && this.currentNote !== null) {
-            var data = {
-                "title": this.titleEditor.val(),
-                "contents": this.contentsEditor.val()
-            };
+        if (this.securityToken !== null && note !== null) {
             $.ajax({
                 type: "PUT",
                 contentType: "application/json; charset=utf-8",
-                url: "/api/v1/notes/" + this.currentNote.id,
-                data: JSON.stringify(data),
+                url: "/api/v1/notes/" + note.id,
+                data: JSON.stringify(note),
                 beforeSend: function (xhr) {
                     xhr.setRequestHeader("Authorization", "Bearer " + _this.securityToken);
                 },
@@ -209,7 +222,7 @@ var Application = (function () {
             var p = $("<p>");
             var editButton = $('<input type="button" value="edit">');
             editButton.bind('click', function () {
-                _this.viewNote(note);
+                _this.editor.showNote(note);
             });
             var deleteButton = $('<input type="button" value="delete">');
             deleteButton.bind('click', function () {

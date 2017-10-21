@@ -170,29 +170,45 @@ var NetworkComponent = (function () {
     };
     return NetworkComponent;
 }());
+var Toolbar = (function () {
+    function Toolbar() {
+        var _this = this;
+        this.delegate = null;
+        this._createNoteButton = $('#createNoteButton');
+        this._backupButton = $('#backupButton');
+        this._createNoteButton.bind('click', function () {
+            _this.delegate.onCreate();
+        });
+        this._backupButton.bind('click', function () {
+            _this.delegate.onBackup();
+        });
+    }
+    Toolbar.prototype.enable = function () {
+        this._createNoteButton.removeAttr("disabled");
+        this._backupButton.removeAttr("disabled");
+    };
+    Toolbar.prototype.disable = function () {
+        this._createNoteButton.attr("disabled", "disabled");
+        this._backupButton.attr("disabled", "disabled");
+    };
+    return Toolbar;
+}());
 var Application = (function () {
     function Application() {
-        var _this = this;
         this._notesList = new NotesList();
         this._editor = new Editor();
         this._loginForm = new LoginForm();
         this._network = new NetworkComponent();
+        this._toolbar = new Toolbar();
         this._noteTemplate = {
             "title": "New note",
             "contents": "New note contents"
         };
-        this._createNoteButton = $('#createNoteButton');
-        this._backupButton = $('#backupButton');
         this._downloadFrame = document.getElementById('downloadFrame');
         this._editor.delegate = this;
         this._notesList.delegate = this;
         this._loginForm.delegate = this;
-        this._createNoteButton.bind('click', function () {
-            _this.createNote();
-        });
-        this._backupButton.bind('click', function () {
-            _this.backup();
-        });
+        this._toolbar.delegate = this;
     }
     Application.prototype.onLogin = function (user, pass) {
         var _this = this;
@@ -201,8 +217,7 @@ var Application = (function () {
         this._network.sendRequest("POST", url, null, function (data) {
             var securityToken = data["token"];
             _this._network.tokenAuth(securityToken);
-            _this._createNoteButton.removeAttr("disabled");
-            _this._backupButton.removeAttr("disabled");
+            _this._toolbar.enable();
             _this._loginForm.disable();
             _this.getNotes();
         });
@@ -211,11 +226,10 @@ var Application = (function () {
         this._editor.disable();
         this._notesList.empty();
         this._network.noAuth();
-        this._createNoteButton.attr("disabled", "disabled");
-        this._backupButton.attr("disabled", "disabled");
+        this._toolbar.disable();
         this._loginForm.enable();
     };
-    Application.prototype.createNote = function () {
+    Application.prototype.onCreate = function () {
         var _this = this;
         this._editor.disable();
         var url = "/api/v1/notes";
@@ -232,7 +246,7 @@ var Application = (function () {
             _this._notesList.displayNotes(notes);
         });
     };
-    Application.prototype.backup = function () {
+    Application.prototype.onBackup = function () {
         // The Vapor docs indicate that one can pass
         // the current security token in the URL
         // https://docs.vapor.codes/2.0/auth/helper/

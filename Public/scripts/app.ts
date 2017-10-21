@@ -195,35 +195,56 @@ class NetworkComponent {
     }
 }
 
-class Application implements EditorDelegate, NotesListDelegate, LoginFormDelegate {
+class Toolbar {
+    public delegate: ToolbarDelegate = null;
     private _createNoteButton;
     private _backupButton;
-    private _downloadFrame;
+
+    constructor() {
+        this._createNoteButton = $('#createNoteButton');
+        this._backupButton = $('#backupButton');
+        this._createNoteButton.bind('click', () => {
+            this.delegate.onCreate();
+        });
+        this._backupButton.bind('click', () => {
+            this.delegate.onBackup();
+        });
+    }
+
+    enable(): void {
+        this._createNoteButton.removeAttr("disabled");
+        this._backupButton.removeAttr("disabled");
+    }
+
+    disable(): void {
+        this._createNoteButton.attr("disabled", "disabled");
+        this._backupButton.attr("disabled", "disabled");
+    }
+}
+
+interface ToolbarDelegate {
+    onCreate(): void;
+    onBackup(): void;
+}
+
+class Application implements EditorDelegate, NotesListDelegate, LoginFormDelegate, ToolbarDelegate {
     private _notesList = new NotesList();
     private _editor = new Editor();
     private _loginForm = new LoginForm();
     private _network = new NetworkComponent();
+    private _toolbar = new Toolbar();
+    private _downloadFrame;
     private _noteTemplate = {
         "title": "New note",
         "contents": "New note contents"
     };
 
     constructor() {
-        this._createNoteButton = $('#createNoteButton');
-        this._backupButton = $('#backupButton');
         this._downloadFrame = document.getElementById('downloadFrame');
-
         this._editor.delegate = this;
         this._notesList.delegate = this;
         this._loginForm.delegate = this;
-
-        this._createNoteButton.bind('click', () => {
-            this.createNote();
-        });
-
-        this._backupButton.bind('click', () => {
-            this.backup();
-        });
+        this._toolbar.delegate = this;
     }
 
     onLogin(user: String, pass: String): void {
@@ -232,8 +253,7 @@ class Application implements EditorDelegate, NotesListDelegate, LoginFormDelegat
         this._network.sendRequest("POST", url, null, (data) => {
             let securityToken = data["token"];
             this._network.tokenAuth(securityToken);
-            this._createNoteButton.removeAttr("disabled");
-            this._backupButton.removeAttr("disabled");
+            this._toolbar.enable();
             this._loginForm.disable();
             this.getNotes();
         });
@@ -243,12 +263,11 @@ class Application implements EditorDelegate, NotesListDelegate, LoginFormDelegat
         this._editor.disable();
         this._notesList.empty();
         this._network.noAuth();
-        this._createNoteButton.attr("disabled", "disabled");
-        this._backupButton.attr("disabled", "disabled");
+        this._toolbar.disable();
         this._loginForm.enable();
     }
 
-    public createNote(): void {
+    onCreate(): void {
         this._editor.disable();
         let url = "/api/v1/notes";
         let data = JSON.stringify(this._noteTemplate);
@@ -265,7 +284,7 @@ class Application implements EditorDelegate, NotesListDelegate, LoginFormDelegat
         });
     }
 
-    public backup(): void {
+    onBackup(): void {
         // The Vapor docs indicate that one can pass
         // the current security token in the URL
         // https://docs.vapor.codes/2.0/auth/helper/

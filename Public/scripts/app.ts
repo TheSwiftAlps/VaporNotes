@@ -161,14 +161,17 @@ enum AuthType {
 class NetworkComponent {
     private auth = AuthType.none;
     private beforeSendCallback = (xhr) => {};
+    public securityToken: String = null;
 
     noAuth(): void {
         this.auth = AuthType.none;
+        this.securityToken = null;
         this.beforeSendCallback = (xhr) => {};
     }
 
     basicAuth(username: String, password: String) {
         this.auth = AuthType.basic;
+        this.securityToken = null;
         this.beforeSendCallback = (xhr) => {
             let token = btoa(username + ":" + password);
             xhr.setRequestHeader ("Authorization", "Basic " + token);
@@ -177,6 +180,7 @@ class NetworkComponent {
 
     tokenAuth(token: String): void {
         this.auth = AuthType.token;
+        this.securityToken = token;
         this.beforeSendCallback = (xhr) => {
             xhr.setRequestHeader ("Authorization", "Bearer " + token);
         };
@@ -199,6 +203,8 @@ class NetworkComponent {
 
 class Application implements EditorDelegate, NotesListDelegate, LoginFormDelegate {
     private createNoteButton;
+    private backupButton;
+    private downloadFrame;
     private notesList = new NotesList();
     private editor = new Editor();
     private loginForm = new LoginForm();
@@ -210,6 +216,8 @@ class Application implements EditorDelegate, NotesListDelegate, LoginFormDelegat
 
     constructor() {
         this.createNoteButton = $('#createNoteButton');
+        this.backupButton = $('#backupButton');
+        this.downloadFrame = document.getElementById('downloadFrame');
 
         this.editor.delegate = this;
         this.notesList.delegate = this;
@@ -217,6 +225,10 @@ class Application implements EditorDelegate, NotesListDelegate, LoginFormDelegat
 
         this.createNoteButton.bind('click', () => {
             this.createNote();
+        });
+
+        this.backupButton.bind('click', () => {
+            this.backup();
         });
     }
 
@@ -227,6 +239,7 @@ class Application implements EditorDelegate, NotesListDelegate, LoginFormDelegat
             let securityToken = data["token"];
             this.network.tokenAuth(securityToken);
             this.createNoteButton.removeAttr("disabled");
+            this.backupButton.removeAttr("disabled");
             this.loginForm.disable();
             this.getNotes();
         });
@@ -237,6 +250,7 @@ class Application implements EditorDelegate, NotesListDelegate, LoginFormDelegat
         this.notesList.empty();
         this.network.noAuth();
         this.createNoteButton.attr("disabled", "disabled");
+        this.backupButton.attr("disabled", "disabled");
         this.loginForm.enable();
     }
 
@@ -255,6 +269,16 @@ class Application implements EditorDelegate, NotesListDelegate, LoginFormDelegat
             let notes = data["data"];
             this.notesList.displayNotes(notes);
         });
+    }
+
+    public backup(): void {
+        // The Vapor docs indicate that one can pass
+        // the current security token in the URL
+        // https://docs.vapor.codes/2.0/auth/helper/
+        let url = "/api/v1/notes/backup?_authorizationBearer=" + this.network.securityToken;
+        // Courtesy of
+        // https://stackoverflow.com/a/3749395/133764
+        this.downloadFrame['src'] = url;
     }
 
     onSaveButtonClick(note): void {

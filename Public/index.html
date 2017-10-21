@@ -14,7 +14,8 @@
 
 <hr>
 
-<p><input type="button" value="create note" id="createNoteButton" disabled="disabled" /></p>
+<p><input type="button" value="create note" id="createNoteButton" disabled="disabled" />
+<input type="button" value="backup" id="backupButton" disabled="disabled"/></p>
 
 <div id="notesDiv">
 </div>
@@ -26,6 +27,8 @@
     <p>contents:<br/><textarea id="contentsField" rows="15" cols="100"></textarea></p>
     <p><input type="button" value="save" id="saveButton"></p>
 </div>
+
+<iframe id="downloadFrame" style="display:none;"></iframe>
 
 <script src="scripts/jquery-3.2.1.min.js"></script>
 <script src="scripts/app.js"></script>

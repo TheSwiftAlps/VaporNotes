@@ -16,8 +16,6 @@ final class NoteController {
     }
 
     func zip(_ req: Request) throws -> ResponseRepresentable {
-        guard let accept = req.headers["Accept"] else { throw Abort.badRequest }
-        if accept != "application/zip" { throw Abort.badRequest }
         let fileManager = FileManager()
         do {
             let temp = try fileManager.createTemporaryDirectory()

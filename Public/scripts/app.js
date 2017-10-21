@@ -136,13 +136,16 @@ var NetworkComponent = (function () {
     function NetworkComponent() {
         this.auth = AuthType.none;
         this.beforeSendCallback = function (xhr) { };
+        this.securityToken = null;
     }
     NetworkComponent.prototype.noAuth = function () {
         this.auth = AuthType.none;
+        this.securityToken = null;
         this.beforeSendCallback = function (xhr) { };
     };
     NetworkComponent.prototype.basicAuth = function (username, password) {
         this.auth = AuthType.basic;
+        this.securityToken = null;
         this.beforeSendCallback = function (xhr) {
             var token = btoa(username + ":" + password);
             xhr.setRequestHeader("Authorization", "Basic " + token);
@@ -150,6 +153,7 @@ var NetworkComponent = (function () {
     };
     NetworkComponent.prototype.tokenAuth = function (token) {
         this.auth = AuthType.token;
+        this.securityToken = token;
         this.beforeSendCallback = function (xhr) {
             xhr.setRequestHeader("Authorization", "Bearer " + token);
         };
@@ -181,11 +185,16 @@ var Application = (function () {
             "contents": "New note contents"
         };
         this.createNoteButton = $('#createNoteButton');
+        this.backupButton = $('#backupButton');
+        this.downloadFrame = document.getElementById('downloadFrame');
         this.editor.delegate = this;
         this.notesList.delegate = this;
         this.loginForm.delegate = this;
         this.createNoteButton.bind('click', function () {
             _this.createNote();
+        });
+        this.backupButton.bind('click', function () {
+            _this.backup();
         });
     }
     Application.prototype.onLogin = function (user, pass) {
@@ -196,6 +205,7 @@ var Application = (function () {
             var securityToken = data["token"];
             _this.network.tokenAuth(securityToken);
             _this.createNoteButton.removeAttr("disabled");
+            _this.backupButton.removeAttr("disabled");
             _this.loginForm.disable();
             _this.getNotes();
         });
@@ -205,6 +215,7 @@ var Application = (function () {
         this.notesList.empty();
         this.network.noAuth();
         this.createNoteButton.attr("disabled", "disabled");
+        this.backupButton.attr("disabled", "disabled");
         this.loginForm.enable();
     };
     Application.prototype.createNote = function () {
@@ -223,6 +234,15 @@ var Application = (function () {
             var notes = data["data"];
             _this.notesList.displayNotes(notes);
         });
+    };
+    Application.prototype.backup = function () {
+        // The Vapor docs indicate that one can pass
+        // the current security token in the URL
+        // https://docs.vapor.codes/2.0/auth/helper/
+        var url = "/api/v1/notes/backup?_authorizationBearer=" + this.network.securityToken;
+        // Courtesy of
+        // https://stackoverflow.com/a/3749395/133764
+        this.downloadFrame['src'] = url;
     };
     Application.prototype.onSaveButtonClick = function (note) {
         var _this = this;

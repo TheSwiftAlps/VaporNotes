@@ -14,7 +14,7 @@ var Editor = (function () {
                 "id": _this._currentNote.id
             };
             if (_this.delegate) {
-                _this.delegate.onSaveButtonClick(data);
+                _this.delegate.onSaveNote(data);
             }
         });
     }
@@ -241,7 +241,7 @@ var Application = (function () {
         // https://stackoverflow.com/a/3749395/133764
         this._downloadFrame['src'] = url;
     };
-    Application.prototype.onSaveButtonClick = function (note) {
+    Application.prototype.onSaveNote = function (note) {
         var _this = this;
         var url = "/api/v1/notes/" + note.id;
         var data = JSON.stringify(note);

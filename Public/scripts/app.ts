@@ -19,7 +19,7 @@ class Editor {
                 "id": this._currentNote.id
             };
             if (this.delegate) {
-                this.delegate.onSaveButtonClick(data);
+                this.delegate.onSaveNote(data);
             }
         });
     }
@@ -44,7 +44,7 @@ class Editor {
 }
 
 interface EditorDelegate {
-    onSaveButtonClick(note);
+    onSaveNote(note);
 }
 
 class NotesList {
@@ -275,7 +275,7 @@ class Application implements EditorDelegate, NotesListDelegate, LoginFormDelegat
         this._downloadFrame['src'] = url;
     }
 
-    onSaveButtonClick(note): void {
+    onSaveNote(note): void {
         let url = "/api/v1/notes/" + note.id;
         let data = JSON.stringify(note);
         this._network.sendRequest("PUT", url, data, () => {

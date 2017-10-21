@@ -29,7 +29,7 @@
       <file leaf-file-name="app.ts" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/scripts/app.ts">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-4550">
+            <state relative-caret-position="-782">
               <caret line="89" column="0" lean-forward="false" selection-start-line="89" selection-start-column="0" selection-end-line="89" selection-end-column="0" />
               <folding />
             </state>
@@ -146,7 +146,7 @@
       <updated>1508513924186</updated>
       <workItem from="1508513926857" duration="8363000" />
       <workItem from="1508568281091" duration="8108000" />
-      <workItem from="1508590380937" duration="3008000" />
+      <workItem from="1508590380937" duration="3588000" />
     </task>
     <task id="LOCAL-00001" summary="Refactored network calls in a single component">
       <created>1508572795040</created>
@@ -159,7 +159,7 @@
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="19479000" />
+    <option name="totallyTimeSpent" value="20059000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="119" y="24" width="1442" height="912" extended-state="6" />
@@ -273,7 +273,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/scripts/app.ts">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-4550">
+        <state relative-caret-position="-782">
           <caret line="89" column="0" lean-forward="false" selection-start-line="89" selection-start-column="0" selection-end-line="89" selection-end-column="0" />
           <folding />
         </state>

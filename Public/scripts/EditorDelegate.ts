@@ -1,0 +1,3 @@
+interface EditorDelegate {
+    onSaveNote(note);
+}

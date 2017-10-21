@@ -1,0 +1,1 @@
+{"version":3,"file":"EditorDelegate.js","sourceRoot":"","sources":["EditorDelegate.ts"],"names":[],"mappings":"","sourcesContent":["export interface EditorDelegate {\n    onSaveNote(note);\n}"]}

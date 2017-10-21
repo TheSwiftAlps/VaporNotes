@@ -1,0 +1,1 @@
+{"version":3,"file":"NotesListDelegate.js","sourceRoot":"","sources":["NotesListDelegate.ts"],"names":[],"mappings":"","sourcesContent":["export interface NotesListDelegate {\n    onEditNote(note): void;\n    onDeleteNote(note): void;\n    onPublishNote(note): void;\n    onUnpublishNote(note): void;\n}\n"]}

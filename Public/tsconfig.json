@@ -1,13 +1,9 @@
 {
   "compilerOptions": {
-    "allowSyntheticDefaultImports": true,
-    "module": "commonjs",
+    "removeComments": true,
     "target": "es5",
-    "lib": ["es2016","dom"],
-    "sourceMap": true
-  },
-  "exclude": [
-    "node_modules",
-    "public/tests/*.ts"
-  ]
+    "sourceMap": true,
+    "inlineSources": true,
+    "outFile": "scripts/app.js"
+  }
 }

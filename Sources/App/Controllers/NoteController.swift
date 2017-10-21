@@ -47,7 +47,6 @@ final class NoteController {
 
     func search(_ req: Request) throws -> ResponseRepresentable {
         if let query = req.data["query"]?.string {
-            print(query)
             let notes = try req.user().notes
                             .or { orGroup in
                                 try orGroup.filter("title", .contains, query)

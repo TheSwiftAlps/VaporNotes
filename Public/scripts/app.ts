@@ -152,25 +152,16 @@ interface LoginFormDelegate {
     onLogout(): void;
 }
 
-enum AuthType {
-    none,
-    basic,
-    token
-}
-
 class NetworkComponent {
-    private auth = AuthType.none;
     private beforeSendCallback = (xhr) => {};
     public securityToken: String = null;
 
     noAuth(): void {
-        this.auth = AuthType.none;
         this.securityToken = null;
         this.beforeSendCallback = (xhr) => {};
     }
 
     basicAuth(username: String, password: String) {
-        this.auth = AuthType.basic;
         this.securityToken = null;
         this.beforeSendCallback = (xhr) => {
             let token = btoa(username + ":" + password);
@@ -179,7 +170,6 @@ class NetworkComponent {
     }
 
     tokenAuth(token: String): void {
-        this.auth = AuthType.token;
         this.securityToken = token;
         this.beforeSendCallback = (xhr) => {
             xhr.setRequestHeader ("Authorization", "Bearer " + token);

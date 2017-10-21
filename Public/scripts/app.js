@@ -126,25 +126,16 @@ var LoginForm = (function () {
     };
     return LoginForm;
 }());
-var AuthType;
-(function (AuthType) {
-    AuthType[AuthType["none"] = 0] = "none";
-    AuthType[AuthType["basic"] = 1] = "basic";
-    AuthType[AuthType["token"] = 2] = "token";
-})(AuthType || (AuthType = {}));
 var NetworkComponent = (function () {
     function NetworkComponent() {
-        this.auth = AuthType.none;
         this.beforeSendCallback = function (xhr) { };
         this.securityToken = null;
     }
     NetworkComponent.prototype.noAuth = function () {
-        this.auth = AuthType.none;
         this.securityToken = null;
         this.beforeSendCallback = function (xhr) { };
     };
     NetworkComponent.prototype.basicAuth = function (username, password) {
-        this.auth = AuthType.basic;
         this.securityToken = null;
         this.beforeSendCallback = function (xhr) {
             var token = btoa(username + ":" + password);
@@ -152,7 +143,6 @@ var NetworkComponent = (function () {
         };
     };
     NetworkComponent.prototype.tokenAuth = function (token) {
-        this.auth = AuthType.token;
         this.securityToken = token;
         this.beforeSendCallback = function (xhr) {
             xhr.setRequestHeader("Authorization", "Bearer " + token);

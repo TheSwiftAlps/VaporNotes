@@ -2,13 +2,9 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="da14e329-022a-4460-8df5-3d7e6f5f8199" name="Default" comment="Refactored network calls in a single component">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/index.html" afterPath="$PROJECT_DIR$/index.html" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/scripts/app.js" afterPath="$PROJECT_DIR$/scripts/app.js" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/scripts/app.js.map" afterPath="$PROJECT_DIR$/scripts/app.js.map" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/scripts/app.ts" afterPath="$PROJECT_DIR$/scripts/app.ts" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../Sources/App/Controllers/NoteController.swift" afterPath="$PROJECT_DIR$/../Sources/App/Controllers/NoteController.swift" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../Sources/App/Routes/Routes.swift" afterPath="$PROJECT_DIR$/../Sources/App/Routes/Routes.swift" />
     </list>
     <ignored path="$PROJECT_DIR$/.tmp/" />
     <ignored path="$PROJECT_DIR$/temp/" />
@@ -37,8 +33,8 @@
       <file leaf-file-name="app.ts" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/scripts/app.ts">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="499">
-              <caret line="334" column="24" lean-forward="false" selection-start-line="334" selection-start-column="24" selection-end-line="334" selection-end-column="24" />
+            <state relative-caret-position="329">
+              <caret line="222" column="38" lean-forward="false" selection-start-line="222" selection-start-column="38" selection-end-line="222" selection-end-column="38" />
               <folding />
             </state>
           </provider>
@@ -149,7 +145,7 @@
       <updated>1508513924186</updated>
       <workItem from="1508513926857" duration="8363000" />
       <workItem from="1508568281091" duration="8108000" />
-      <workItem from="1508590380937" duration="1398000" />
+      <workItem from="1508590380937" duration="1651000" />
     </task>
     <task id="LOCAL-00001" summary="Refactored network calls in a single component">
       <created>1508572795040</created>
@@ -162,7 +158,7 @@
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="17869000" />
+    <option name="totallyTimeSpent" value="18122000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="119" y="24" width="1442" height="912" extended-state="6" />
@@ -276,8 +272,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/scripts/app.ts">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="499">
-          <caret line="334" column="24" lean-forward="false" selection-start-line="334" selection-start-column="24" selection-end-line="334" selection-end-column="24" />
+        <state relative-caret-position="329">
+          <caret line="222" column="38" lean-forward="false" selection-start-line="222" selection-start-column="38" selection-end-line="222" selection-end-column="38" />
           <folding />
         </state>
       </provider>

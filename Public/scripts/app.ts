@@ -220,6 +220,7 @@ class Toolbar {
             this.delegate.onSearch(searchQuery);
         });
         this._resetButton.bind('click', () => {
+            this._searchField.val("");
             this.delegate.onReset();
         });
     }

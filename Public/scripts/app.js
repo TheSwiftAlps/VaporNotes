@@ -190,6 +190,7 @@ var Toolbar = (function () {
             _this.delegate.onSearch(searchQuery);
         });
         this._resetButton.bind('click', function () {
+            _this._searchField.val("");
             _this.delegate.onReset();
         });
     }

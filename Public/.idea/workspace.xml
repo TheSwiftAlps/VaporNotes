@@ -152,7 +152,7 @@
       <updated>1508513924186</updated>
       <workItem from="1508513926857" duration="8363000" />
       <workItem from="1508568281091" duration="8108000" />
-      <workItem from="1508590380937" duration="2814000" />
+      <workItem from="1508590380937" duration="2874000" />
     </task>
     <task id="LOCAL-00001" summary="Refactored network calls in a single component">
       <created>1508572795040</created>
@@ -165,7 +165,7 @@
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="19285000" />
+    <option name="totallyTimeSpent" value="19345000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="119" y="24" width="1442" height="912" extended-state="6" />

@@ -225,7 +225,24 @@ class Application implements EditorDelegate, NotesListDelegate {
         }
     }
 
-    public onDeleteNote(note): void {
+    onSaveButtonClick(note): void {
+        if (this.securityToken !== null && note !== null) {
+            $.ajax({
+                type: "PUT",
+                contentType: "application/json; charset=utf-8",
+                url: "/api/v1/notes/" + note.id,
+                data: JSON.stringify(note),
+                beforeSend: (xhr) => {
+                    xhr.setRequestHeader ("Authorization", "Bearer " + this.securityToken);
+                },
+                success: () => {
+                    this.getNotes();
+                },
+            });
+        }
+    }
+
+    onDeleteNote(note): void {
         if (this.securityToken !== null) {
             this.editor.disable();
             $.ajax({
@@ -245,28 +262,11 @@ class Application implements EditorDelegate, NotesListDelegate {
         }
     }
 
-    public onSaveButtonClick(note): void {
-        if (this.securityToken !== null && note !== null) {
-            $.ajax({
-                type: "PUT",
-                contentType: "application/json; charset=utf-8",
-                url: "/api/v1/notes/" + note.id,
-                data: JSON.stringify(note),
-                beforeSend: (xhr) => {
-                    xhr.setRequestHeader ("Authorization", "Bearer " + this.securityToken);
-                },
-                success: () => {
-                    this.getNotes();
-                },
-            });
-        }
-    }
-
-    public onEditNote(note): void {
+    onEditNote(note): void {
         this.editor.showNote(note);
     }
 
-    public onPublishNote(note): void {
+    onPublishNote(note): void {
         if (this.securityToken !== null) {
             $.ajax({
                 type: "PUT",
@@ -282,7 +282,7 @@ class Application implements EditorDelegate, NotesListDelegate {
         }
     }
 
-    public onUnpublishNote(note): void {
+    onUnpublishNote(note): void {
         if (this.securityToken !== null) {
             $.ajax({
                 type: "PUT",

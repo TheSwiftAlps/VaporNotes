@@ -200,6 +200,23 @@ var Application = (function () {
             alert("Please login first");
         }
     };
+    Application.prototype.onSaveButtonClick = function (note) {
+        var _this = this;
+        if (this.securityToken !== null && note !== null) {
+            $.ajax({
+                type: "PUT",
+                contentType: "application/json; charset=utf-8",
+                url: "/api/v1/notes/" + note.id,
+                data: JSON.stringify(note),
+                beforeSend: function (xhr) {
+                    xhr.setRequestHeader("Authorization", "Bearer " + _this.securityToken);
+                },
+                success: function () {
+                    _this.getNotes();
+                },
+            });
+        }
+    };
     Application.prototype.onDeleteNote = function (note) {
         var _this = this;
         if (this.securityToken !== null) {
@@ -218,23 +235,6 @@ var Application = (function () {
         }
         else {
             alert("Please login first");
-        }
-    };
-    Application.prototype.onSaveButtonClick = function (note) {
-        var _this = this;
-        if (this.securityToken !== null && note !== null) {
-            $.ajax({
-                type: "PUT",
-                contentType: "application/json; charset=utf-8",
-                url: "/api/v1/notes/" + note.id,
-                data: JSON.stringify(note),
-                beforeSend: function (xhr) {
-                    xhr.setRequestHeader("Authorization", "Bearer " + _this.securityToken);
-                },
-                success: function () {
-                    _this.getNotes();
-                },
-            });
         }
     };
     Application.prototype.onEditNote = function (note) {

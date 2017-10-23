@@ -1,4 +1,4 @@
 interface LoginFormDelegate {
-    onLogin(user: String, pass: String): void;
+    onLogin(user: string, pass: string): void;
     onLogout(): void;
 }

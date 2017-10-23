@@ -28,7 +28,7 @@ class Application implements EditorDelegate, NotesListDelegate, LoginFormDelegat
         this._toolbar.delegate = this;
     }
 
-    onLogin(user: String, pass: String): void {
+    onLogin(user: string, pass: string): void {
         let url = "/api/v1/login";
         this._network.basicAuth(user, pass);
         this._network.sendRequest("POST", url, null, (data) => {
@@ -76,7 +76,7 @@ class Application implements EditorDelegate, NotesListDelegate, LoginFormDelegat
         this._downloadFrame['src'] = url;
     }
 
-    onSearch(query: String): void {
+    onSearch(query: string): void {
         this._editor.disable();
         if (query === null || query.length == 0) {
             this.getNotes();

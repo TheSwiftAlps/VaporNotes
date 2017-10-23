@@ -1,8 +1,8 @@
 class NetworkComponent {
     private _beforeSendCallback = (xhr) => {};
-    private _securityToken: String = null;
+    private _securityToken: string = null;
 
-    get securityToken(): String {
+    get securityToken(): string {
         return this._securityToken;
     }
 
@@ -11,7 +11,7 @@ class NetworkComponent {
         this._beforeSendCallback = (xhr) => {};
     }
 
-    basicAuth(username: String, password: String) {
+    basicAuth(username: string, password: string) {
         this._securityToken = null;
         this._beforeSendCallback = (xhr) => {
             let token = btoa(username + ":" + password);
@@ -19,14 +19,14 @@ class NetworkComponent {
         };
     }
 
-    tokenAuth(token: String): void {
+    tokenAuth(token: string): void {
         this._securityToken = token;
         this._beforeSendCallback = (xhr) => {
             xhr.setRequestHeader ("Authorization", "Bearer " + token);
         };
     }
 
-    sendRequest(method: String, url: String, data, callback): void {
+    sendRequest(method: string, url: string, data, callback): void {
         $.ajax({
             type: method,
             url: url,

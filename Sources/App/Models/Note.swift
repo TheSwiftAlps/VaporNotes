@@ -58,10 +58,11 @@ final class Note: Model {
         self.slug = generateSlug()
     }
 
-    init(title: String, contents: String) {
+    init(title: String, contents: String, id: Identifier) {
         self.title = title
         self.contents = contents
         self.slug = generateSlug()
+        self.id = id
     }
 
     // MARK: Fluent Serialization
@@ -127,7 +128,8 @@ extension Note: JSONConvertible {
     convenience init(json: JSON) throws {
         self.init(
             title: try json.get(Note.Keys.title),
-            contents: try json.get(Note.Keys.contents)
+            contents: try json.get(Note.Keys.contents),
+            id: try json.get(Note.Keys.id)
         )
     }
 

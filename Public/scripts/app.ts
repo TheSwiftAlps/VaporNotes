@@ -1,4 +1,4 @@
-/// <reference path="./Application.ts" />
+import {Application} from "./Application";
 
 let app;
 

@@ -1,3 +1,3 @@
-interface EditorDelegate {
+export interface EditorDelegate {
     onSaveNote(note);
 }

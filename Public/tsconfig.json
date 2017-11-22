@@ -1,9 +1,9 @@
 {
   "compilerOptions": {
-    "removeComments": true,
+    "allowSyntheticDefaultImports": true,
+    "module": "commonjs",
+    "lib": ["es2016","dom"],
     "target": "es5",
-    "sourceMap": true,
-    "inlineSources": true,
-    "outFile": "scripts/app.js"
+    "sourceMap": true
   }
 }

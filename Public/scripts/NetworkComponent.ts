@@ -1,4 +1,6 @@
-class NetworkComponent {
+import $ = require('jquery');
+
+export class NetworkComponent {
     private _beforeSendCallback = (xhr) => {};
     private _securityToken: string = null;
 

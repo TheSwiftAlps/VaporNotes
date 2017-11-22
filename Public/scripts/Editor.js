@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+var $ = require("jquery");
 var Editor = (function () {
     function Editor() {
         var _this = this;
@@ -38,3 +39,4 @@ var Editor = (function () {
     return Editor;
 }());
 exports.Editor = Editor;
+//# sourceMappingURL=Editor.js.map

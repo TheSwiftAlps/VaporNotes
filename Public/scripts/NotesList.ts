@@ -1,4 +1,7 @@
-class NotesList {
+import $ = require('jquery');
+import {NotesListDelegate} from "./NotesListDelegate";
+
+export class NotesList {
     public delegate: NotesListDelegate = null;
     private _notesDiv;
 

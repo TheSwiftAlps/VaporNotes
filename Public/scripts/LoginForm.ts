@@ -1,4 +1,7 @@
-class LoginForm {
+import $ = require('jquery');
+import {LoginFormDelegate} from "./LoginFormDelegate";
+
+export class LoginForm {
     public delegate: LoginFormDelegate = null;
     private _usernameField;
     private _passwordField;

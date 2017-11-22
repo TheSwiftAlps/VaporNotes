@@ -1,4 +1,7 @@
-class Toolbar {
+import $ = require('jquery');
+import {ToolbarDelegate} from "./ToolbarDelegate";
+
+export class Toolbar {
     public delegate: ToolbarDelegate = null;
     private _createNoteButton;
     private _backupButton;

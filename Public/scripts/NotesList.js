@@ -1,4 +1,6 @@
-/// <reference path="./NotesListDelegate.ts" />
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+var $ = require("jquery");
 var NotesList = (function () {
     function NotesList() {
         this.delegate = null;
@@ -70,3 +72,5 @@ var NotesList = (function () {
     };
     return NotesList;
 }());
+exports.NotesList = NotesList;
+//# sourceMappingURL=NotesList.js.map

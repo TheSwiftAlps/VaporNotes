@@ -1,4 +1,4 @@
-interface ToolbarDelegate {
+export interface ToolbarDelegate {
     onCreate(): void;
     onBackup(): void;
     onSearch(query: String): void;

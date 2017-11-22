@@ -1,4 +1,7 @@
-class Editor {
+import $ = require('jquery');
+import {EditorDelegate} from "./EditorDelegate";
+
+export class Editor {
     public delegate: EditorDelegate = null;
     private _noteEditorDiv;
     private _titleField;

@@ -1,24 +1,21 @@
-/// <reference path="./NetworkComponent.ts" />
-/// <reference path="./EditorDelegate.ts" />
-/// <reference path="./Editor.ts" />
-/// <reference path="./NotesListDelegate.ts" />
-/// <reference path="./NotesList.ts" />
-/// <reference path="./LoginFormDelegate.ts" />
-/// <reference path="./LoginForm.ts" />
-/// <reference path="./ToolbarDelegate.ts" />
-/// <reference path="./Toolbar.ts" />
+import uuid = require("uuid");
+import {EditorDelegate} from "./EditorDelegate";
+import {NotesListDelegate} from "./NotesListDelegate";
+import {LoginFormDelegate} from "./LoginFormDelegate";
+import {ToolbarDelegate} from "./ToolbarDelegate";
+import {NotesList} from "./NotesList";
+import {Editor} from "./Editor";
+import {LoginForm} from "./LoginForm";
+import {NetworkComponent} from "./NetworkComponent";
+import {Toolbar} from "./Toolbar";
 
-class Application implements EditorDelegate, NotesListDelegate, LoginFormDelegate, ToolbarDelegate {
+export class Application implements EditorDelegate, NotesListDelegate, LoginFormDelegate, ToolbarDelegate {
     private _notesList = new NotesList();
     private _editor = new Editor();
     private _loginForm = new LoginForm();
     private _network = new NetworkComponent();
     private _toolbar = new Toolbar();
     private _downloadFrame;
-    private _noteTemplate = {
-        "title": "New note",
-        "contents": "New note contents"
-    };
 
     constructor() {
         this._downloadFrame = document.getElementById('downloadFrame');
@@ -52,7 +49,13 @@ class Application implements EditorDelegate, NotesListDelegate, LoginFormDelegat
     onCreate(): void {
         this._editor.disable();
         let url = "/api/v1/notes";
-        let data = JSON.stringify(this._noteTemplate);
+        let uuidv4: string = uuid.v4();
+        let template = {
+            "title": "New note",
+            "contents": "New note contents",
+            "id": uuidv4
+        };
+        let data = JSON.stringify(template);
         this._network.sendRequest("POST", url, data, () => {
             this.getNotes();
         });
@@ -83,7 +86,7 @@ class Application implements EditorDelegate, NotesListDelegate, LoginFormDelegat
             return;
         }
         let url = "/api/v1/notes/search";
-        let obj = JSON.stringify({ "query": query });
+        let obj = JSON.stringify({"query": query});
         this._network.sendRequest("POST", url, obj, (data) => {
             let notes = data["data"];
             console.dir(notes);

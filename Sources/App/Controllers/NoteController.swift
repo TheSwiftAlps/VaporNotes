@@ -65,6 +65,9 @@ final class NoteController {
     /// construct and save the note
     func store(_ req: Request) throws -> ResponseRepresentable {
         let note = try req.note()
+        if let existing = try Note.makeQuery().filter("id", note.id).first() {
+            throw Abort(.badRequest, reason: "A note with that UUID already exists.")
+        }
         try note.save()
         return try wrapJSONResponse(with: note)
     }
